@@ -5,8 +5,8 @@ import adminRoutes from './admin/adminRoutes';
 import studentRoutes from './student/studentRoutes';
 
 const app = express();
-const PORT = process.env.PORT || 3100;
-const IPURL = `192.168.1.227`;
+const PORT = Number(process.env.PORT) || 3000;
+const IPURL = `0.0.0.0`;
 
 // Garante diretórios de dados (nunca apagados pelo build)
 const dataDir = path.join(process.cwd(), 'data');
