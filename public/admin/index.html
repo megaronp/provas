@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Professor — ProvaSystem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root{--bg:#0f1117;--surface:#181c27;--surface2:#1e2335;--border:#2a3050;--accent:#4f8ef7;--accent2:#7c5cfc;--success:#22d3a5;--danger:#f75050;--warning:#f7a84f;--text:#e8ecf4;--muted:#6b7799;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .brand span{font-weight:700;font-size:1.05rem}
+    .nav-tabs-top{display:flex;gap:4px}
+    .nav-tab{background:transparent;border:1px solid transparent;color:var(--muted);padding:7px 16px;border-radius:8px;font-family:var(--font);font-size:0.83rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:6px}
+    .nav-tab:hover{border-color:var(--border);color:var(--text)}
+    .nav-tab.active{background:var(--surface2);border-color:var(--border);color:var(--text)}
+    .layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 61px)}
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:22px 18px;display:flex;flex-direction:column;gap:18px;overflow-y:auto}
+    .main{padding:28px;overflow-y:auto}
+    .sec-title{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+    .card-d{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+    .card-d2{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px}
+    .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .dot-on{background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse 2s infinite}
+    .dot-off{background:var(--muted)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:.83rem}
+    .stat-row:last-child{border-bottom:none}
+    .stat-val{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:.8rem}
+    /* Buttons */
+    .btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:var(--font);font-weight:600;font-size:.83rem;cursor:pointer;transition:opacity .2s,transform .1s;width:100%}
+    .btn-p:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-o{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:all .2s;width:100%}
+    .btn-o:hover{border-color:var(--accent);background:rgba(79,142,247,.08)}
+    .btn-s{background:rgba(34,211,165,.12);color:var(--success);border:1px solid rgba(34,211,165,.3);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;width:100%}
+    .btn-s:hover{background:rgba(34,211,165,.22)}
+    .btn-d{background:rgba(247,80,80,.12);color:var(--danger);border:1px solid rgba(247,80,80,.3);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;width:100%}
+    .btn-d:hover{background:rgba(247,80,80,.22)}
+    .btn-ic{background:transparent;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0}
+    .btn-ic:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-ic.del:hover{border-color:var(--danger);color:var(--danger)}
+    /* Forms */
+    .fg{margin-bottom:14px}
+    label{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:5px;text-transform:uppercase}
+    input,select,textarea{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-family:var(--font);font-size:.88rem;width:100%;transition:border-color .2s;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+    input::placeholder,textarea::placeholder{color:var(--muted)}
+    select option{background:var(--surface2)}
+    textarea{resize:vertical;min-height:76px}
+    /* Modal */
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s}
+    .modal-ov.open{opacity:1;pointer-events:all}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;transform:scale(.96);transition:transform .22s}
+    .modal-ov.open .modal-box{transform:scale(1)}
+    .modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal-title{font-size:.98rem;font-weight:700}
+    .modal-x{background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;transition:color .2s}
+    .modal-x:hover{color:var(--text)}
+    /* Questão lista */
+    .q-list{display:flex;flex-direction:column;gap:10px}
+    .q-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;align-items:flex-start;gap:11px;transition:border-color .2s}
+    .q-item:hover{border-color:var(--accent)}
+    .q-num{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;flex-shrink:0;font-family:var(--mono)}
+    .q-info{flex:1;min-width:0}
+    .q-env{font-size:.83rem;line-height:1.5;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .q-meta{display:flex;gap:6px;flex-wrap:wrap}
+    .badge{font-size:.66rem;padding:2px 8px;border-radius:20px;font-weight:600}
+    .bm{background:rgba(79,142,247,.15);color:var(--accent)}
+    .bv{background:rgba(247,168,79,.15);color:var(--warning)}
+    .bl{background:rgba(124,92,252,.15);color:var(--accent2)}
+    .bp{background:rgba(34,211,165,.12);color:var(--success)}
+    .q-actions{display:flex;gap:5px;flex-shrink:0}
+    /* Opções dinâmicas */
+    .op-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+    .op-row input[type=text]{flex:1}
+    .op-row input[type=radio],.op-row input[type=checkbox]{width:auto;accent-color:var(--accent)}
+    .add-btn{background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:7px;cursor:pointer;font-size:.8rem;width:100%;transition:all .2s;text-align:center;margin-top:3px}
+    .add-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .af-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+    .af-row input[type=text]{flex:1}
+    .vf-tgl{display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
+    .vf-b{background:transparent;border:none;color:var(--muted);padding:5px 11px;cursor:pointer;font-size:.76rem;font-weight:600;transition:all .2s}
+    .vf-b.av{background:rgba(34,211,165,.2);color:var(--success)}
+    .vf-b.af{background:rgba(247,80,80,.2);color:var(--danger)}
+    .lac-sec{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px;margin-top:11px}
+    .lac-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:9px}
+    .lac-hd{font-size:.72rem;font-weight:700;color:var(--accent2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+    /* Campos aluno */
+    .campo-item{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:grab}
+    .campo-item:active{cursor:grabbing}
+    .campo-drag{color:var(--muted);font-size:16px}
+    .campo-info{flex:1}
+    .campo-label-text{font-size:.85rem;font-weight:600}
+    .campo-tipo-badge{font-size:.66rem;background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:20px;color:var(--muted);margin-top:3px;display:inline-block}
+    /* Toast */
+    .toast-c{position:fixed;bottom:22px;right:22px;z-index:2000;display:flex;flex-direction:column;gap:7px}
+    .toast-m{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:.83rem;display:flex;align-items:center;gap:9px;animation:slideIn .28s ease;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+    .toast-m.ok{border-left:3px solid var(--success)}
+    .toast-m.err{border-left:3px solid var(--danger)}
+    @keyframes slideIn{from{transform:translateX(38px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .empty{text-align:center;padding:50px 16px;color:var(--muted)}
+    .empty .ic{font-size:44px;margin-bottom:10px;opacity:.4}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+    .inline-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">📋</div>
+    <span>ProvaSystem</span>
+  </div>
+  <div class="nav-tabs-top">
+    <a class="nav-tab active" href="/admin"><i class="bi bi-pencil-square"></i> Editor</a>
+    <a class="nav-tab" href="/admin/relatorio"><i class="bi bi-bar-chart-line"></i> Relatórios</a>
+    <a class="nav-tab" href="/" target="_blank"><i class="bi bi-person-check"></i> Área do Aluno</a>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div>
+      <div class="sec-title">Prova Selecionada</div>
+      <div id="prova-card" class="card-d">
+        <div class="empty" style="padding:16px"><div class="ic">📄</div><p style="font-size:.8rem">Nenhuma prova</p></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <button class="btn-p" onclick="abrirModalProva()"><i class="bi bi-plus-lg me-1"></i>Nova Prova</button>
+      <button class="btn-o" id="btn-sel-prova" onclick="abrirModalSelecionar()"><i class="bi bi-folder2-open me-1"></i>Abrir Prova</button>
+      <button id="btn-ativar" class="btn-s" onclick="toggleAtiva()" style="display:none"><i class="bi bi-play-fill me-1"></i>Ativar Prova</button>
+      <button id="btn-del-prova" class="btn-d" onclick="confirmarApagarProva()" style="display:none"><i class="bi bi-trash me-1"></i>Apagar Prova</button>
+    </div>
+    <hr class="divider"/>
+    <div>
+      <div class="sec-title">Campos do Formulário do Aluno</div>
+      <div id="campos-preview" style="margin-bottom:10px;font-size:.78rem;color:var(--muted)">—</div>
+      <button class="btn-o" id="btn-campos" onclick="abrirModalCampos()" disabled><i class="bi bi-sliders me-1"></i>Editar Campos</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <div>
+        <h1 style="font-size:1.25rem;font-weight:700;margin-bottom:3px">Questões</h1>
+        <p style="color:var(--muted);font-size:.82rem">Adicione e gerencie as questões da prova</p>
+      </div>
+      <button class="btn-p" style="width:auto;padding:9px 20px" id="btn-add-q" onclick="abrirModalQuestao(null)" disabled>
+        <i class="bi bi-plus-lg me-1"></i>Adicionar Questão
+      </button>
+    </div>
+    <div id="q-container">
+      <div class="empty"><div class="ic">🗂️</div><p>Crie ou abra uma prova para começar</p></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Prova -->
+<div class="modal-ov" id="m-prova">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-hd"><span class="modal-title">Configurar Prova</span><button class="modal-x" onclick="fecharModal('m-prova')">×</button></div>
+    <div class="fg"><label>Título</label><input id="p-titulo" type="text" placeholder="Ex: Avaliação Bimestral"/></div>
+    <div class="fg"><label>Disciplina</label><input id="p-disciplina" type="text" placeholder="Ex: Matemática"/></div>
+    <div class="fg">
+      <label>ID da Planilha Google Sheets</label>
+      <input id="p-sheet" type="text" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgm..."/>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:5px">O ID fica na URL da planilha entre <code>/d/</code> e <code>/edit</code></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:6px">
+      <button class="btn-o" onclick="fecharModal('m-prova')">Cancelar</button>
+      <button class="btn-p" onclick="salvarProva()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Selecionar Prova -->
+<div class="modal-ov" id="m-sel">
+  <div class="modal-box" style="max-width:580px">
+    <div class="modal-hd"><span class="modal-title">Abrir Prova</span><button class="modal-x" onclick="fecharModal('m-sel')">×</button></div>
+    <div id="lista-provas-modal" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- Modal Campos do Aluno -->
+<div class="modal-ov" id="m-campos">
+  <div class="modal-box" style="max-width:660px">
+    <div class="modal-hd"><span class="modal-title">Campos do Formulário do Aluno</span><button class="modal-x" onclick="fecharModal('m-campos')">×</button></div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Defina quais campos o aluno precisará preencher antes de iniciar a prova. Arraste para reordenar.</p>
+    <div id="campos-lista" style="margin-bottom:14px"></div>
+    <button class="add-btn" onclick="adicionarCampoUI()"><i class="bi bi-plus me-1"></i>Adicionar Campo</button>
+    <div style="display:flex;gap:9px;margin-top:16px">
+      <button class="btn-o" onclick="fecharModal('m-campos')">Cancelar</button>
+      <button class="btn-p" onclick="salvarCampos()">Salvar Campos</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Questão -->
+<div class="modal-ov" id="m-questao">
+  <div class="modal-box" style="max-width:720px">
+    <div class="modal-hd"><span id="m-q-title" class="modal-title">Adicionar Questão</span><button class="modal-x" onclick="fecharModal('m-questao')">×</button></div>
+    <div class="inline-grid-2" style="margin-bottom:14px">
+      <div class="fg" style="margin:0"><label>Tipo</label>
+        <select id="q-tipo" onchange="renderCamposTipo()">
+          <option value="multipla">Múltipla Escolha</option>
+          <option value="vf">Verdadeiro ou Falso</option>
+          <option value="lacuna">Preencher Lacunas</option>
+        </select>
+      </div>
+      <div class="fg" style="margin:0"><label>Valor (pontos)</label><input id="q-valor" type="number" min="0.5" step="0.5" value="1"/></div>
+    </div>
+    <div class="fg"><label>Enunciado</label><textarea id="q-enunciado" placeholder="Digite o enunciado..."></textarea></div>
+    <div id="campos-tipo"></div>
+    <div style="display:flex;gap:9px;margin-top:16px">
+      <button class="btn-o" onclick="fecharModal('m-questao')">Cancelar</button>
+      <button class="btn-p" id="btn-salvar-q" onclick="salvarQuestao()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-c" id="tc"></div>
+
+<script>
+let prova = null;
+let editandoQuestaoId = null;
+let camposEditando = [];
+let criandoNovaProva = false;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  const r = await fetch('/admin/prova');
+  prova = await r.json();
+  renderSidebar();
+  renderQuestoes();
+}
+
+// ── Sidebar ──────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const card = document.getElementById('prova-card');
+  const btnAtivar = document.getElementById('btn-ativar');
+  const btnDel = document.getElementById('btn-del-prova');
+  const btnAdd = document.getElementById('btn-add-q');
+  const btnCampos = document.getElementById('btn-campos');
+
+  if (!prova) {
+    card.innerHTML = `<div class="empty" style="padding:16px"><div class="ic">📄</div><p style="font-size:.8rem">Nenhuma prova</p></div>`;
+    btnAtivar.style.display='none'; btnDel.style.display='none';
+    btnAdd.disabled=true; btnCampos.disabled=true;
+    document.getElementById('campos-preview').textContent='—';
+    return;
+  }
+  const total = prova.questoes.reduce((a,q)=>a+q.valor,0);
+  card.innerHTML=`
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
+      <div class="status-dot ${prova.ativa?'dot-on':'dot-off'}"></div>
+      <span style="font-size:.72rem;color:var(--muted)">${prova.ativa?'ATIVA':'INATIVA'}</span>
+    </div>
+    <div style="font-size:1rem;font-weight:700;margin-bottom:2px">${prova.titulo}</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px">${prova.disciplina}</div>
+    <div class="stat-row"><span>Questões</span><span class="stat-val">${prova.questoes.length}</span></div>
+    <div class="stat-row"><span>Total pts</span><span class="stat-val">${total.toFixed(1)}</span></div>
+    <div class="stat-row"><span>Sheet ID</span><span class="stat-val" style="font-size:.68rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prova.googleSheetId.slice(0,14)}…</span></div>`;
+  btnAtivar.style.display='block';
+  btnAtivar.innerHTML=prova.ativa?'<i class="bi bi-stop-fill me-1"></i>Desativar':'<i class="bi bi-play-fill me-1"></i>Ativar Prova';
+  btnAtivar.className=prova.ativa?'btn-d':'btn-s';
+  btnDel.style.display='block';
+  btnAdd.disabled=false; btnCampos.disabled=false;
+
+  const campos = prova.camposAluno||[];
+  document.getElementById('campos-preview').textContent=campos.length
+    ? campos.map(c=>c.label).join(' · ')
+    : 'Nenhum campo';
+}
+
+function renderQuestoes() {
+  const c = document.getElementById('q-container');
+  if (!prova||prova.questoes.length===0) {
+    c.innerHTML=`<div class="empty"><div class="ic">🗂️</div><p>${prova?'Nenhuma questão ainda':'Crie ou abra uma prova'}</p></div>`;
+    return;
+  }
+  c.innerHTML=`<div class="q-list">${prova.questoes.map(q=>{
+    const tipos={multipla:['bm','Múltipla Escolha'],vf:['bv','V/F'],lacuna:['bl','Lacunas']};
+    const [cls,lbl]=tipos[q.tipo];
+    const env=q.enunciado.length>90?q.enunciado.slice(0,90)+'…':q.enunciado;
+    return `<div class="q-item">
+      <div class="q-num">${q.numero}</div>
+      <div class="q-info">
+        <div class="q-env">${env}</div>
+        <div class="q-meta"><span class="badge ${cls}">${lbl}</span><span class="badge bp">${q.valor} pts</span></div>
+      </div>
+      <div class="q-actions">
+        <button class="btn-ic" onclick="abrirModalQuestao('${q.id}')" title="Editar"><i class="bi bi-pencil"></i></button>
+        <button class="btn-ic del" onclick="deletarQuestao('${q.id}')" title="Remover"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Modal Prova ──────────────────────────────────────────────────────────────
+function abrirModalProva() {
+  criandoNovaProva = true;
+  document.getElementById('p-titulo').value='';
+  document.getElementById('p-disciplina').value='';
+  document.getElementById('p-sheet').value='';
+  abrirModal('m-prova');
+}
+
+async function salvarProva() {
+  const titulo=document.getElementById('p-titulo').value.trim();
+  const disciplina=document.getElementById('p-disciplina').value.trim();
+  const googleSheetId=document.getElementById('p-sheet').value.trim();
+  if (!titulo||!disciplina||!googleSheetId){toast('Preencha todos os campos','err');return;}
+  const method=criandoNovaProva?'POST':'PUT';
+  const r=await fetch('/admin/prova',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({titulo,disciplina,googleSheetId})});
+  prova=await r.json();
+  criandoNovaProva=false;
+  fecharModal('m-prova');
+  renderSidebar();renderQuestoes();
+  toast('Prova salva!','ok');
+}
+
+// ── Selecionar Prova ─────────────────────────────────────────────────────────
+async function abrirModalSelecionar() {
+  criandoNovaProva=false;
+  const r=await fetch('/admin/provas');
+  const lista=await r.json();
+  const el=document.getElementById('lista-provas-modal');
+  if (!lista.length){el.innerHTML='<div class="empty"><div class="ic">📂</div><p>Nenhuma prova salva</p></div>';abrirModal('m-sel');return;}
+  el.innerHTML=lista.map(p=>`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:3px">${p.titulo}</div>
+        <div style="font-size:.75rem;color:var(--muted)">${p.disciplina} · ${p.questoes.length} questões · ${p.ativa?'<span style="color:var(--success)">ATIVA</span>':'Inativa'}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-ic" onclick="selecionarProva('${p.id}')" title="Selecionar"><i class="bi bi-check-lg"></i></button>
+        <button class="btn-ic del" onclick="apagarProvaDaLista('${p.id}')" title="Apagar"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>`).join('');
+  abrirModal('m-sel');
+}
+
+async function selecionarProva(id) {
+  await fetch(`/admin/prova/${id}/selecionar`,{method:'POST'});
+  const r=await fetch(`/admin/prova/${id}`);
+  prova=await r.json();
+  criandoNovaProva=false;
+  fecharModal('m-sel');
+  renderSidebar();renderQuestoes();
+  toast('Prova carregada!','ok');
+}
+
+async function apagarProvaDaLista(id) {
+  if (!confirm('Apagar esta prova permanentemente?')) return;
+  await fetch(`/admin/prova/${id}`,{method:'DELETE'});
+  if (prova?.id===id) prova=null;
+  renderSidebar();renderQuestoes();
+  toast('Prova apagada','ok');
+  abrirModalSelecionar();
+}
+
+async function confirmarApagarProva() {
+  if (!prova) return;
+  if (!confirm(`Apagar a prova "${prova.titulo}" permanentemente? Esta ação não pode ser desfeita.`)) return;
+  await fetch(`/admin/prova/${prova.id}`,{method:'DELETE'});
+  prova=null;
+  renderSidebar();renderQuestoes();
+  toast('Prova apagada','ok');
+}
+
+async function toggleAtiva() {
+  const ep=prova.ativa?'/admin/desativar':'/admin/ativar';
+  const r=await fetch(ep,{method:'POST'});
+  if (r.ok){
+    prova.ativa=!prova.ativa;
+    renderSidebar();
+    toast(prova.ativa?'Prova ativada!':'Prova desativada','ok');
+  } else {
+    const d=await r.json(); toast(d.erro,'err');
+  }
+}
+
+// ── Modal Campos Aluno ───────────────────────────────────────────────────────
+function abrirModalCampos() {
+  camposEditando = JSON.parse(JSON.stringify(prova.camposAluno||[]));
+  renderCamposLista();
+  abrirModal('m-campos');
+}
+
+function renderCamposLista() {
+  const c=document.getElementById('campos-lista');
+  if (!camposEditando.length){c.innerHTML='<p style="color:var(--muted);font-size:.8rem;text-align:center;padding:10px">Nenhum campo. Adicione abaixo.</p>';return;}
+  c.innerHTML=camposEditando.map((campo,i)=>`
+    <div class="campo-item" draggable="true" data-idx="${i}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)">
+      <span class="campo-drag"><i class="bi bi-grip-vertical"></i></span>
+      <div class="campo-info">
+        <div class="campo-label-text">${campo.label}</div>
+        <span class="campo-tipo-badge">${campo.tipo}${campo.obrigatorio?' · obrigatório':''}</span>
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="btn-ic" onclick="editarCampoUI(${i})" title="Editar"><i class="bi bi-pencil"></i></button>
+        <button class="btn-ic del" onclick="removerCampo(${i})" title="Remover"><i class="bi bi-x"></i></button>
+      </div>
+    </div>
+    <div id="campo-editor-${i}" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;margin-top:-4px">
+      ${renderCampoEditor(campo, i)}
+    </div>`).join('');
+}
+
+function renderCampoEditor(campo, i) {
+  const temOpcoes = ['radio','checkbox','select'].includes(campo.tipo);
+  return `
+    <div class="inline-grid-2" style="margin-bottom:10px">
+      <div class="fg" style="margin:0"><label>Tipo</label>
+        <select onchange="atualizarCampoTipo(${i},this.value)">
+          ${['text','textarea','radio','checkbox','select'].map(t=>`<option value="${t}" ${campo.tipo===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg" style="margin:0"><label>Rótulo do Campo</label>
+        <input type="text" value="${campo.label}" oninput="atualizarCampoLabel(${i},this.value)"/>
+      </div>
+    </div>
+    <div class="fg">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;text-transform:none;font-size:.82rem">
+        <input type="checkbox" style="width:auto" ${campo.obrigatorio?'checked':''} onchange="atualizarCampoObrig(${i},this.checked)"/>
+        Campo obrigatório
+      </label>
+    </div>
+    ${temOpcoes?`
+    <div>
+      <label>Opções</label>
+      <div id="campo-opcoes-${i}">${(campo.opcoes||[]).map((op,oi)=>`
+        <div class="op-row">
+          <input type="text" value="${op.label}" oninput="atualizarOpcaoCampo(${i},${oi},this.value)"/>
+          <button class="btn-ic del" onclick="removerOpcaoCampo(${i},${oi})"><i class="bi bi-x"></i></button>
+        </div>`).join('')}
+      </div>
+      <button class="add-btn" onclick="adicionarOpcaoCampo(${i})"><i class="bi bi-plus me-1"></i>Adicionar opção</button>
+    </div>`:''}`;
+}
+
+function adicionarCampoUI() {
+  const novo = {id:`campo-${Date.now()}`,tipo:'text',label:'Novo Campo',obrigatorio:false,opcoes:[],ordem:camposEditando.length};
+  camposEditando.push(novo);
+  renderCamposLista();
+  editarCampoUI(camposEditando.length-1);
+}
+
+function editarCampoUI(i) {
+  document.querySelectorAll('[id^="campo-editor-"]').forEach(el=>el.style.display='none');
+  const el=document.getElementById(`campo-editor-${i}`);
+  if (el) el.style.display='block';
+}
+
+function removerCampo(i) {
+  camposEditando.splice(i,1);
+  camposEditando.forEach((c,idx)=>c.ordem=idx);
+  renderCamposLista();
+}
+
+function atualizarCampoTipo(i,val) {
+  camposEditando[i].tipo=val;
+  if (['radio','checkbox','select'].includes(val) && !camposEditando[i].opcoes) camposEditando[i].opcoes=[];
+  renderCamposLista();
+  editarCampoUI(i);
+}
+function atualizarCampoLabel(i,val){camposEditando[i].label=val;}
+function atualizarCampoObrig(i,val){camposEditando[i].obrigatorio=val;}
+function atualizarOpcaoCampo(i,oi,val){camposEditando[i].opcoes[oi].label=val;camposEditando[i].opcoes[oi].value=val.toLowerCase().replace(/\s+/g,'_');}
+function removerOpcaoCampo(i,oi){camposEditando[i].opcoes.splice(oi,1);renderCamposLista();editarCampoUI(i);}
+function adicionarOpcaoCampo(i){
+  if (!camposEditando[i].opcoes) camposEditando[i].opcoes=[];
+  camposEditando[i].opcoes.push({label:'Nova Opção',value:'nova_opcao'});
+  renderCamposLista();editarCampoUI(i);
+}
+
+// Drag & drop para reordenar campos
+let dragIdx=null;
+function dragStart(e){dragIdx=parseInt(e.currentTarget.dataset.idx);}
+function dragOver(e){e.preventDefault();}
+function dragDrop(e){
+  const targetIdx=parseInt(e.currentTarget.dataset.idx);
+  if (dragIdx===null||dragIdx===targetIdx) return;
+  const moved=camposEditando.splice(dragIdx,1)[0];
+  camposEditando.splice(targetIdx,0,moved);
+  camposEditando.forEach((c,i)=>c.ordem=i);
+  dragIdx=null;
+  renderCamposLista();
+}
+
+async function salvarCampos() {
+  const r=await fetch('/admin/campos-aluno',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({campos:camposEditando})});
+  if (r.ok){
+    prova.camposAluno=camposEditando;
+    fecharModal('m-campos');
+    renderSidebar();
+    toast('Campos salvos!','ok');
+  }
+}
+
+// ── Modal Questão ────────────────────────────────────────────────────────────
+function abrirModalQuestao(id) {
+  editandoQuestaoId=id;
+  const q=id?prova.questoes.find(x=>x.id===id):null;
+  document.getElementById('m-q-title').textContent=id?'Editar Questão':'Adicionar Questão';
+  document.getElementById('btn-salvar-q').textContent=id?'Salvar Alterações':'Adicionar';
+  document.getElementById('q-tipo').value=q?.tipo||'multipla';
+  document.getElementById('q-valor').value=q?.valor||1;
+  document.getElementById('q-enunciado').value=q?.enunciado||'';
+  renderCamposTipo(q);
+  abrirModal('m-questao');
+}
+
+function renderCamposTipo(q=null) {
+  const tipo=document.getElementById('q-tipo').value;
+  const c=document.getElementById('campos-tipo');
+  if (tipo==='multipla') c.innerHTML=renderMultiplaForm(q?.tipo==='multipla'?q:null);
+  else if (tipo==='vf') c.innerHTML=renderVFForm(q?.tipo==='vf'?q:null);
+  else c.innerHTML=renderLacunaForm(q?.tipo==='lacuna'?q:null);
+}
+
+function renderMultiplaForm(q) {
+  const opcoes=q?.opcoes||[{id:'op-0',texto:'',correta:true},{id:'op-1',texto:'',correta:false},{id:'op-2',texto:'',correta:false},{id:'op-3',texto:'',correta:false}];
+  return `
+    <div class="sec-title" style="margin-bottom:9px">Opções (marque todas as corretas com ✓)</div>
+    <div style="font-size:.75rem;color:var(--warning);margin-bottom:10px;padding:8px 12px;background:rgba(247,168,79,.08);border:1px solid rgba(247,168,79,.2);border-radius:7px">
+      <i class="bi bi-info-circle me-1"></i>Pode ter mais de uma correta. Pontuação: <strong>+1 unidade</strong> por correta marcada, <strong>+1 unidade</strong> por errada não marcada. Total de unidades = total de opções.
+    </div>
+    <div id="opcoes-lista">
+      ${opcoes.map((op,i)=>`
+        <div class="op-row">
+          <input type="checkbox" ${op.correta?'checked':''} title="Marcar como correta"/>
+          <input type="text" placeholder="Opção ${String.fromCharCode(65+i)}" value="${op.texto}"/>
+          ${i>=2?`<button class="btn-ic del" onclick="this.parentElement.remove()" title="Remover"><i class="bi bi-x"></i></button>`:''}
+        </div>`).join('')}
+    </div>
+    <button class="add-btn" onclick="adicionarOpcaoMultipla()"><i class="bi bi-plus me-1"></i>Adicionar opção</button>`;
+}
+
+function adicionarOpcaoMultipla(){
+  const l=document.getElementById('opcoes-lista');
+  const n=l.children.length;
+  const d=document.createElement('div');d.className='op-row';
+  d.innerHTML=`<input type="checkbox"/><input type="text" placeholder="Opção ${String.fromCharCode(65+n)}"/><button class="btn-ic del" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`;
+  l.appendChild(d);
+}
+
+function renderVFForm(q) {
+  const afs=q?.afirmativas||[{id:'af-0',texto:'',correta:true},{id:'af-1',texto:'',correta:false}];
+  return `
+    <div class="sec-title" style="margin-bottom:9px">Afirmativas</div>
+    <div style="font-size:.75rem;color:var(--warning);margin-bottom:10px;padding:8px 12px;background:rgba(247,168,79,.08);border:1px solid rgba(247,168,79,.2);border-radius:7px">
+      <i class="bi bi-info-circle me-1"></i>Pontuação proporcional. Resposta errada desconta o mesmo valor da resposta certa.
+    </div>
+    <div id="afirmativas-lista">
+      ${afs.map((af,i)=>`
+        <div class="af-row">
+          <input type="text" placeholder="Afirmativa ${i+1}" value="${af.texto}"/>
+          <div class="vf-tgl" data-selected="${af.correta?'v':'f'}">
+            <button type="button" class="vf-b ${af.correta?'av':''}" onclick="setVF(this,'v')" data-val="v">V</button>
+            <button type="button" class="vf-b ${!af.correta?'af':''}" onclick="setVF(this,'f')" data-val="f">F</button>
+          </div>
+          ${i>=1?`<button class="btn-ic del" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`:''}
+        </div>`).join('')}
+    </div>
+    <button class="add-btn" onclick="adicionarAfirmativa()"><i class="bi bi-plus me-1"></i>Adicionar afirmativa</button>`;
+}
+
+function setVF(btn,val){
+  const t=btn.parentElement;
+  t.querySelectorAll('.vf-b').forEach(b=>{b.classList.remove('av','af');});
+  btn.classList.add(val==='v'?'av':'af');
+  t.dataset.selected=val;
+}
+
+function adicionarAfirmativa(){
+  const l=document.getElementById('afirmativas-lista');
+  const n=l.children.length;
+  const d=document.createElement('div');d.className='af-row';
+  d.innerHTML=`<input type="text" placeholder="Afirmativa ${n+1}"/><div class="vf-tgl" data-selected="v"><button type="button" class="vf-b av" onclick="setVF(this,'v')">V</button><button type="button" class="vf-b" onclick="setVF(this,'f')">F</button></div><button class="btn-ic del" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`;
+  l.appendChild(d);
+}
+
+function renderLacunaForm(q) {
+  return `
+    <div class="fg"><label>Texto com Lacunas</label>
+      <textarea id="lacuna-texto" placeholder="Use {{0}}, {{1}}, etc.\nEx: O Brasil foi descoberto em {{0}} por {{1}}." style="min-height:90px">${q?.textoComLacunas||''}</textarea>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Cada <code style="color:var(--accent2)">{{N}}</code> vira uma lacuna numerada.</div>
+    </div>
+    <div class="lac-sec">
+      <div class="sec-title">Configurar Lacunas</div>
+      <div id="lacunas-config">${q?renderLacunasConfig(q):''}</div>
+      <button class="add-btn" onclick="detectarLacunas()"><i class="bi bi-arrow-clockwise me-1"></i>Detectar lacunas do texto</button>
+    </div>`;
+}
+
+function renderLacunasConfig(q) {
+  return q.lacunas.map(lac=>`
+    <div class="lac-item">
+      <div class="lac-hd">Lacuna {{${lac.posicao}}}</div>
+      <div class="fg" style="margin-bottom:7px"><label>Resposta correta</label>
+        <input type="text" id="lc-${lac.posicao}" value="${lac.correta}" placeholder="Palavra correta"/>
+      </div>
+      <div><label>Opções para o aluno</label>
+        <div id="lo-${lac.posicao}">
+          ${lac.opcoes.map((op,oi)=>`
+            <div class="op-row">
+              <input type="text" id="lop-${lac.posicao}-${oi}" value="${op}"/>
+              ${oi>=2?`<button class="btn-ic del" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`:''}
+            </div>`).join('')}
+        </div>
+        <button class="add-btn" onclick="addLacOpcao(${lac.posicao})"><i class="bi bi-plus me-1"></i>Opção</button>
+      </div>
+    </div>`).join('');
+}
+
+function detectarLacunas(){
+  const txt=document.getElementById('lacuna-texto').value;
+  const matches=[...txt.matchAll(/\{\{(\d+)\}\}/g)];
+  const idxs=[...new Set(matches.map(m=>parseInt(m[1])))].sort((a,b)=>a-b);
+  document.getElementById('lacunas-config').innerHTML=idxs.map(i=>`
+    <div class="lac-item">
+      <div class="lac-hd">Lacuna {{${i}}}</div>
+      <div class="fg" style="margin-bottom:7px"><label>Resposta correta</label><input type="text" id="lc-${i}" placeholder="Palavra correta"/></div>
+      <div><label>Opções</label>
+        <div id="lo-${i}">
+          <div class="op-row"><input type="text" id="lop-${i}-0" placeholder="Opção A"/></div>
+          <div class="op-row"><input type="text" id="lop-${i}-1" placeholder="Opção B"/></div>
+        </div>
+        <button class="add-btn" onclick="addLacOpcao(${i})"><i class="bi bi-plus me-1"></i>Opção</button>
+      </div>
+    </div>`).join('');
+}
+
+function addLacOpcao(i){
+  const l=document.getElementById(`lo-${i}`);
+  const n=l.children.length;
+  const d=document.createElement('div');d.className='op-row';
+  d.innerHTML=`<input type="text" id="lop-${i}-${n}" placeholder="Opção ${String.fromCharCode(65+n)}"/><button class="btn-ic del" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>`;
+  l.appendChild(d);
+}
+
+// ── Salvar Questão ───────────────────────────────────────────────────────────
+async function salvarQuestao(){
+  const tipo=document.getElementById('q-tipo').value;
+  const valor=parseFloat(document.getElementById('q-valor').value);
+  const enunciado=document.getElementById('q-enunciado').value.trim();
+  if (!enunciado||isNaN(valor)){toast('Preencha enunciado e valor','err');return;}
+  let payload={tipo,valor,enunciado};
+
+  if (tipo==='multipla'){
+    const rows=document.getElementById('opcoes-lista').children;
+    const opcoes=[...rows].map((row,i)=>({
+      id:`op-${i}`,
+      texto:row.querySelector('input[type=text]').value.trim(),
+      correta:row.querySelector('input[type=checkbox]').checked
+    })).filter(o=>o.texto);
+    if (opcoes.length<2){toast('Adicione ao menos 2 opções','err');return;}
+    if (!opcoes.some(o=>o.correta)){toast('Marque ao menos uma opção correta','err');return;}
+    payload.opcoes=opcoes;
+  }
+
+  if (tipo==='vf'){
+    const rows=document.getElementById('afirmativas-lista').children;
+    const afirmativas=[...rows].map((row,i)=>({
+      id:`af-${i}`,
+      texto:row.querySelector('input[type=text]').value.trim(),
+      correta:(row.querySelector('.vf-tgl')?.dataset.selected||'v')==='v'
+    })).filter(a=>a.texto);
+    if (!afirmativas.length){toast('Adicione ao menos 1 afirmativa','err');return;}
+    payload.afirmativas=afirmativas;
+  }
+
+  if (tipo==='lacuna'){
+    const texto=document.getElementById('lacuna-texto')?.value.trim();
+    if (!texto){toast('Digite o texto com lacunas','err');return;}
+    const matches=[...texto.matchAll(/\{\{(\d+)\}\}/g)];
+    const idxs=[...new Set(matches.map(m=>parseInt(m[1])))].sort((a,b)=>a-b);
+    const lacunas=idxs.map(i=>{
+      const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
+      const opEls=document.getElementById(`lo-${i}`)?.children||[];
+      const opcoes=[...opEls].map(row=>row.querySelector('input[type=text]').value.trim()).filter(Boolean);
+      return {id:`lac-${i}`,posicao:i,opcoes,correta};
+    });
+    if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
+    payload.textoComLacunas=texto;
+    payload.lacunas=lacunas;
+  }
+
+  let r;
+  if (editandoQuestaoId){
+    r=await fetch(`/admin/questao/${editandoQuestaoId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const updated=await r.json();
+    const idx=prova.questoes.findIndex(q=>q.id===editandoQuestaoId);
+    if (idx>=0) prova.questoes[idx]=updated;
+  } else {
+    r=await fetch('/admin/questao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const nova=await r.json();
+    prova.questoes.push(nova);
+  }
+  fecharModal('m-questao');
+  renderSidebar();renderQuestoes();
+  toast(editandoQuestaoId?'Questão atualizada!':'Questão adicionada!','ok');
+}
+
+async function deletarQuestao(id){
+  if (!confirm('Remover esta questão?')) return;
+  await fetch(`/admin/questao/${id}`,{method:'DELETE'});
+  prova.questoes=prova.questoes.filter(q=>q.id!==id).map((q,i)=>({...q,numero:i+1}));
+  renderSidebar();renderQuestoes();
+  toast('Questão removida','ok');
+}
+
+// ── Modais ───────────────────────────────────────────────────────────────────
+function abrirModal(id){document.getElementById(id).classList.add('open');}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-ov').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function toast(msg,tipo='ok'){
+  const c=document.getElementById('tc');
+  const d=document.createElement('div');
+  d.className=`toast-m ${tipo}`;
+  d.innerHTML=`<i class="bi bi-${tipo==='ok'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+  c.appendChild(d);setTimeout(()=>d.remove(),3000);
+}
+
+init();
+</script>
+</body>
+</html>

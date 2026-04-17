@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Relatórios — ProvaSystem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{--bg:#0f1117;--surface:#181c27;--surface2:#1e2335;--border:#2a3050;--accent:#4f8ef7;--accent2:#7c5cfc;--success:#22d3a5;--danger:#f75050;--warning:#f7a84f;--text:#e8ecf4;--muted:#6b7799;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .brand span{font-weight:700;font-size:1.05rem}
+    .nav-tabs-top{display:flex;gap:4px}
+    .nav-tab{background:transparent;border:1px solid transparent;color:var(--muted);padding:7px 16px;border-radius:8px;font-family:var(--font);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:6px}
+    .nav-tab:hover{border-color:var(--border);color:var(--text)}
+    .nav-tab.active{background:var(--surface2);border-color:var(--border);color:var(--text)}
+    .main{max-width:1100px;margin:0 auto;padding:32px 24px}
+    .card-d{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px}
+    .card-d2{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px}
+    .sec-title{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .stat-big{text-align:center;padding:20px}
+    .stat-big .num{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--accent);line-height:1}
+    .stat-big .lbl{font-size:.75rem;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
+    .btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:var(--font);font-weight:600;font-size:.83rem;cursor:pointer;transition:opacity .2s}
+    .btn-p:hover{opacity:.88}
+    .btn-o{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:all .2s}
+    .btn-o:hover{border-color:var(--accent)}
+    .btn-s{background:rgba(34,211,165,.12);color:var(--success);border:1px solid rgba(34,211,165,.3);border-radius:8px;padding:8px 16px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:6px}
+    .btn-s:hover{background:rgba(34,211,165,.22)}
+    select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-family:var(--font);font-size:.88rem;outline:none}
+    select:focus{border-color:var(--accent)}
+    select option{background:var(--surface2)}
+    .progress-bar-wrap{background:var(--border);border-radius:20px;height:8px;overflow:hidden;flex:1}
+    .progress-bar-fill{height:100%;border-radius:20px;transition:width .5s}
+    .table-res th{background:var(--surface2);color:var(--muted);font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;padding:10px 12px;font-weight:700;border-bottom:1px solid var(--border)}
+    .table-res td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:.83rem;vertical-align:middle}
+    .table-res tr:last-child td{border-bottom:none}
+    .table-res tr:hover td{background:var(--surface2)}
+    .empty{text-align:center;padding:60px 16px;color:var(--muted)}
+    .empty .ic{font-size:44px;margin-bottom:10px;opacity:.4}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--muted);font-size:.9rem}
+    .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .badge-pct{font-size:.75rem;font-family:var(--mono);font-weight:600;padding:2px 9px;border-radius:20px}
+    .pct-high{background:rgba(34,211,165,.15);color:var(--success)}
+    .pct-mid{background:rgba(247,168,79,.15);color:var(--warning)}
+    .pct-low{background:rgba(247,80,80,.15);color:var(--danger)}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">📋</div>
+    <span>ProvaSystem</span>
+  </div>
+  <div class="nav-tabs-top">
+    <a class="nav-tab" href="/admin"><i class="bi bi-pencil-square"></i> Editor</a>
+    <a class="nav-tab active" href="/admin/relatorio"><i class="bi bi-bar-chart-line"></i> Relatórios</a>
+    <a class="nav-tab" href="/" target="_blank"><i class="bi bi-person-check"></i> Área do Aluno</a>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Seleção de prova -->
+  <div class="card-d" style="margin-bottom:24px">
+    <div class="sec-title">Selecionar Prova</div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <select id="sel-prova" style="flex:1;min-width:240px" onchange="selecionarProvaRelatorio()">
+        <option value="">— Selecione uma prova —</option>
+      </select>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" id="btn-csv" onclick="baixarCSV()" style="display:none"><i class="bi bi-download"></i>Exportar CSV</button>
+        <button class="btn-s" id="btn-pdf" onclick="imprimirPDF()" style="display:none"><i class="bi bi-file-pdf"></i>Exportar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="relatorio-area">
+    <div class="empty"><div class="ic">📊</div><p>Selecione uma prova para ver o relatório</p></div>
+  </div>
+</div>
+
+<script>
+let provaAtual = null;
+let relatorioAtual = null;
+
+async function init() {
+  const r = await fetch('/admin/provas');
+  const provas = await r.json();
+  const sel = document.getElementById('sel-prova');
+  provas.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.titulo} — ${p.disciplina}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function selecionarProvaRelatorio() {
+  const id = document.getElementById('sel-prova').value;
+  if (!id) { document.getElementById('relatorio-area').innerHTML='<div class="empty"><div class="ic">📊</div><p>Selecione uma prova</p></div>'; return; }
+
+  document.getElementById('relatorio-area').innerHTML='<div class="loading"><div class="spinner"></div>Carregando dados do Google Sheets…</div>';
+
+  const rp = await fetch(`/admin/prova/${id}`);
+  provaAtual = await rp.json();
+
+  const rr = await fetch(`/admin/relatorio/${id}`);
+  if (!rr.ok) {
+    const err = await rr.json();
+    document.getElementById('relatorio-area').innerHTML=`<div class="empty"><div class="ic">⚠️</div><p>${err.erro}</p></div>`;
+    return;
+  }
+  relatorioAtual = await rr.json();
+
+  document.getElementById('btn-csv').style.display='flex';
+  document.getElementById('btn-pdf').style.display='flex';
+  renderRelatorio();
+}
+
+function renderRelatorio() {
+  const r = relatorioAtual;
+  if (!r || r.totalAlunos === 0) {
+    document.getElementById('relatorio-area').innerHTML=`
+      <div class="empty"><div class="ic">📭</div><p>Nenhuma resposta encontrada na planilha para esta prova.</p></div>`;
+    return;
+  }
+
+  const pct = r.notaMaxima > 0 ? ((r.mediaGeral / r.notaMaxima) * 100).toFixed(1) : 0;
+  const notaMin = r.resultados.length ? Math.min(...r.resultados.map(x=>x.notaTotal)).toFixed(2) : 0;
+  const notaMax = r.resultados.length ? Math.max(...r.resultados.map(x=>x.notaTotal)).toFixed(2) : 0;
+
+  document.getElementById('relatorio-area').innerHTML = `
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
+      <div class="card-d stat-big"><div class="num">${r.totalAlunos}</div><div class="lbl">Alunos</div></div>
+      <div class="card-d stat-big"><div class="num" style="color:var(--accent)">${r.mediaGeral}</div><div class="lbl">Média Geral</div></div>
+      <div class="card-d stat-big"><div class="num" style="color:var(--success)">${notaMax}</div><div class="lbl">Maior Nota</div></div>
+      <div class="card-d stat-big"><div class="num" style="color:var(--danger)">${notaMin}</div><div class="lbl">Menor Nota</div></div>
+    </div>
+
+    <!-- Gráfico + Médias por questão -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+      <div class="card-d">
+        <div class="sec-title">Média por Questão</div>
+        <div style="position:relative;height:240px;width:100%">
+          <canvas id="chart-questoes"></canvas>
+        </div>
+      </div>
+      <div class="card-d">
+        <div class="sec-title">Desempenho por Questão</div>
+        <div style="display:flex;flex-direction:column;gap:10px;max-height:260px;overflow-y:auto;padding-right:4px">
+          ${r.mediasPorQuestao.map(m=>{
+            const cls = m.percentual>=70?'pct-high':m.percentual>=40?'pct-mid':'pct-low';
+            const barColor = m.percentual>=70?'var(--success)':m.percentual>=40?'var(--warning)':'var(--danger)';
+            const env = m.enunciado.length>50?m.enunciado.slice(0,50)+'…':m.enunciado;
+            return `<div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                <span style="font-size:.78rem;color:var(--text)">Q${m.numero} — ${env}</span>
+                <span class="badge-pct ${cls}">${m.percentual}%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${m.percentual}%;background:${barColor}"></div></div>
+                <span style="font-size:.72rem;font-family:var(--mono);color:var(--muted);white-space:nowrap">${m.mediaObtida}/${m.valorTotal}</span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de resultados -->
+    <div class="card-d">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="sec-title" style="margin:0">Resultados por Aluno</div>
+        <span style="font-size:.75rem;color:var(--muted)">${r.totalAlunos} registro(s)</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse" class="table-res">
+          <thead>
+            <tr>
+              ${Object.keys(r.resultados[0]?.aluno||{}).map(k=>`<th>${k}</th>`).join('')}
+              ${r.mediasPorQuestao.map(m=>`<th>Q${m.numero}</th>`).join('')}
+              <th>Nota Final</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${r.resultados.map(res=>{
+              const pctRes = r.notaMaxima>0?((res.notaTotal/r.notaMaxima)*100).toFixed(0):0;
+              const pctCls = pctRes>=70?'pct-high':pctRes>=40?'pct-mid':'pct-low';
+              const campoVals = Object.values(res.aluno).map(v=>Array.isArray(v)?v.join(', '):v);
+              const questaoVals = provaAtual.questoes.map(q=>{
+                const rq = res.resultadosPorQuestao.find(x=>x.questaoId===q.id);
+                return rq?.pontosObtidos??'—';
+              });
+              return `<tr>
+                ${campoVals.map(v=>`<td>${v}</td>`).join('')}
+                ${questaoVals.map(v=>`<td style="font-family:var(--mono);font-size:.78rem;text-align:center">${v}</td>`).join('')}
+                <td style="font-family:var(--mono);font-weight:700;color:var(--accent)">${res.notaTotal}</td>
+                <td><span class="badge-pct ${pctCls}">${pctRes}%</span></td>
+              </tr>`;
+            }).join('')}
+            <!-- Linha de médias -->
+            <tr style="background:var(--surface2)">
+              ${Object.keys(r.resultados[0]?.aluno||{}).map((k,i)=>`<td style="font-weight:700;font-size:.78rem">${i===0?'MÉDIA':''}</td>`).join('')}
+              ${r.mediasPorQuestao.map(m=>`<td style="font-family:var(--mono);font-size:.78rem;text-align:center;color:var(--accent);font-weight:700">${m.mediaObtida}</td>`).join('')}
+              <td style="font-family:var(--mono);font-weight:700;color:var(--accent)">${r.mediaGeral}</td>
+              <td><span class="badge-pct pct-${pct>=70?'high':pct>=40?'mid':'low'}">${pct}%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // Gráfico
+  renderChart(r);
+}
+
+function renderChart(r) {
+  const ctx = document.getElementById('chart-questoes')?.getContext('2d');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: r.mediasPorQuestao.map(m=>`Q${m.numero}`),
+      datasets: [
+        { label: 'Média obtida', data: r.mediasPorQuestao.map(m=>m.mediaObtida), backgroundColor: 'rgba(79,142,247,.7)', borderRadius: 5 },
+        { label: 'Valor total', data: r.mediasPorQuestao.map(m=>m.valorTotal), backgroundColor: 'rgba(42,48,80,.6)', borderRadius: 5 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#6b7799', font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { color: '#6b7799' }, grid: { color: 'rgba(42,48,80,.5)' } },
+        y: { ticks: { color: '#6b7799' }, grid: { color: 'rgba(42,48,80,.5)' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function baixarCSV() {
+  const id = provaAtual?.id;
+  if (!id) return;
+  window.location.href = `/admin/relatorio/${id}/csv`;
+}
+
+function imprimirPDF() {
+  window.print();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prova — Sistema de Avaliação</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e2e0d8;--accent:#2d6be4;--acl:#eef3fd;--success:#18a46a;--sl:#edfaf4;--danger:#d94040;--warning:#d97706;--text:#1a1a2e;--muted:#8b8a82;--font:'Plus Jakarta Sans',sans-serif;--mono:'Fira Code',monospace}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+    .header{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.07);position:sticky;top:0;z-index:100}
+    .header-brand{display:flex;align-items:center;gap:9px}
+    .hdot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+    .header-brand span{font-weight:700;font-size:.98rem}
+    .header-info{font-size:.78rem;color:var(--muted);text-align:right}
+    .prog-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 22px}
+    .prog-outer{background:var(--border);border-radius:20px;height:6px;overflow:hidden}
+    .prog-inner{height:100%;background:linear-gradient(90deg,var(--accent),#5b8ef5);border-radius:20px;transition:width .4s}
+    .prog-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:.7rem;color:var(--muted)}
+    .bullets{display:flex;gap:5px;flex-wrap:wrap;padding:0 22px 11px;background:var(--surface);border-bottom:1px solid var(--border)}
+    .bullet{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:var(--mono)}
+    .bullet.resp{background:var(--acl);border-color:var(--accent);color:var(--accent)}
+    .bullet.curr{background:var(--accent);border-color:var(--accent);color:#fff}
+    .wrap{max-width:700px;margin:0 auto;padding:28px 18px 100px}
+    .card-q{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:0 2px 14px rgba(0,0,0,.07);margin-bottom:18px}
+    .q-hd{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+    .q-num{background:var(--accent);color:#fff;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.88rem;font-family:var(--mono);flex-shrink:0}
+    .q-tipo{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px}
+    .tm{background:var(--acl);color:var(--accent)}
+    .tv{background:#fff8ec;color:var(--warning)}
+    .tl{background:#f5f0ff;color:#6b3fa0}
+    .q-val{margin-left:auto;font-size:.78rem;color:var(--muted);font-weight:500}
+    .q-env{font-size:1rem;line-height:1.7;margin-bottom:22px}
+    /* Múltipla */
+    .op-btn{width:100%;text-align:left;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-family:var(--font);font-size:.88rem;color:var(--text);transition:all .2s;display:flex;align-items:center;gap:11px;margin-bottom:7px}
+    .op-btn:hover{border-color:var(--accent);background:var(--acl)}
+    .op-btn.sel{border-color:var(--accent);background:var(--acl);color:var(--accent);font-weight:600}
+    .op-letra{width:26px;height:26px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;flex-shrink:0;font-family:var(--mono);transition:all .2s}
+    .op-btn.sel .op-letra{background:var(--accent);color:#fff}
+    .multi-hint{font-size:.74rem;color:var(--warning);padding:8px 11px;background:#fffbf2;border:1px solid #f5c96a;border-radius:7px;margin-bottom:14px}
+    /* VF */
+    .vf-table{width:100%;border-collapse:collapse}
+    .vf-row{border-bottom:1px solid var(--border)}
+    .vf-row:last-child{border-bottom:none}
+    .vf-txt{padding:13px 10px;font-size:.88rem;line-height:1.5}
+    .vf-act{padding:13px 7px;white-space:nowrap}
+    .vf-btn{padding:7px 14px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);font-family:var(--font);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;margin:0 2px}
+    .vf-btn:hover{border-color:var(--accent)}
+    .vf-btn.va{background:var(--sl);border-color:var(--success);color:var(--success)}
+    .vf-btn.fa{background:#fef2f2;border-color:var(--danger);color:var(--danger)}
+    /* Lacuna */
+    .lac-wrap{font-size:.98rem;line-height:2.4}
+    .lac-sel{display:inline-block;min-width:110px;border:2px dashed var(--border);border-radius:7px;padding:3px 9px;font-family:var(--font);font-size:.88rem;background:var(--surface2);cursor:pointer;color:var(--muted);vertical-align:middle;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%238b8a82' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:26px;transition:all .2s}
+    .lac-sel:focus{outline:none;border-color:var(--accent);border-style:solid;background-color:var(--acl);color:var(--text)}
+    .lac-sel.prec{border-style:solid;border-color:var(--accent);color:var(--text);background-color:var(--acl)}
+    /* Nav bar */
+    .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 -4px 18px rgba(0,0,0,.08);z-index:100}
+    .btn-nav{padding:9px 22px;border-radius:9px;font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;border:none}
+    .btn-ant{background:var(--surface2);color:var(--text);border:1.5px solid var(--border)}
+    .btn-ant:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-prx{background:var(--accent);color:#fff}
+    .btn-prx:hover{background:#1e5bd0}
+    .btn-env{background:var(--success);color:#fff}
+    .btn-env:hover{background:#14855a}
+    /* Inicio */
+    .tela-inicio{max-width:500px;margin:50px auto;padding:0 18px}
+    .inicio-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:36px;box-shadow:0 8px 36px rgba(0,0,0,.1)}
+    .inicio-hd{text-align:center;margin-bottom:28px}
+    .inicio-ic{font-size:46px;margin-bottom:10px}
+    .inicio-title{font-size:1.35rem;font-weight:800;margin-bottom:5px}
+    .inicio-sub{color:var(--muted);font-size:.88rem}
+    .ff{margin-bottom:16px}
+    .ff label{font-size:.75rem;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px}
+    .ff input,.ff select,.ff textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:var(--font);font-size:.93rem;background:var(--surface2);color:var(--text);outline:none;transition:border-color .2s}
+    .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent);background:#fff}
+    .ff textarea{resize:vertical;min-height:70px}
+    .ff .check-group{display:flex;flex-direction:column;gap:7px}
+    .ff .check-item{display:flex;align-items:center;gap:9px;cursor:pointer;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;transition:all .2s}
+    .ff .check-item:hover{border-color:var(--accent);background:var(--acl)}
+    .ff .check-item input{width:auto;accent-color:var(--accent)}
+    .btn-iniciar{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:var(--font);font-size:.98rem;font-weight:700;cursor:pointer;transition:background .2s,transform .1s;margin-top:7px}
+    .btn-iniciar:hover{background:#1e5bd0;transform:translateY(-1px)}
+    /* Revisão */
+    .tela-rev{max-width:620px;margin:0 auto;padding:28px 18px 100px}
+    .rev-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:0 2px 14px rgba(0,0,0,.07)}
+    .rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-bottom:22px}
+    .rev-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:all .2s}
+    .rev-item:hover{border-color:var(--accent);background:var(--acl)}
+    .rev-item.resp{border-color:var(--success)}
+    .rev-item.pend{border-color:var(--warning);background:#fffbf2}
+    .rev-num{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:800;font-family:var(--mono);flex-shrink:0}
+    .rn-ok{background:var(--sl);color:var(--success)}
+    .rn-pd{background:#fff8ec;color:var(--warning)}
+    /* Resultado */
+    .tela-res{max-width:500px;margin:50px auto;padding:0 18px}
+    .res-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:36px;box-shadow:0 8px 36px rgba(0,0,0,.1);text-align:center}
+    .nota-circle{width:120px;height:120px;border-radius:50%;border:5px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--acl)}
+    .nota-num{font-size:2rem;font-weight:900;color:var(--accent);font-family:var(--mono);line-height:1}
+    .nota-max{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:20px 0}
+    .det-item{background:var(--surface2);border-radius:9px;padding:13px;text-align:left}
+    .det-label{font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:3px}
+    .det-val{font-size:.98rem;font-weight:700;font-family:var(--mono)}
+    .sem-prova{text-align:center;padding:80px 18px}
+    .sem-prova .ic{font-size:60px;margin-bottom:14px;opacity:.4}
+    /* Seleção de prova */
+    .tela-selecao{max-width:580px;margin:50px auto;padding:0 18px}
+    .sel-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:36px;box-shadow:0 8px 36px rgba(0,0,0,.1)}
+    .sel-hd{text-align:center;margin-bottom:28px}
+    .sel-ic{font-size:46px;margin-bottom:10px}
+    .sel-title{font-size:1.35rem;font-weight:800;margin-bottom:5px}
+    .sel-sub{color:var(--muted);font-size:.88rem}
+    .prova-lista{display:flex;flex-direction:column;gap:11px;margin-bottom:20px}
+    .prova-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px}
+    .prova-item:hover{border-color:var(--accent);background:var(--acl)}
+    .prova-icon{width:44px;height:44px;border-radius:11px;background:var(--acl);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .prova-info{flex:1}
+    .prova-titulo{font-weight:700;font-size:.98rem;margin-bottom:3px}
+    .prova-disciplina{font-size:.78rem;color:var(--muted)}
+    .prova-qtd{font-size:.72rem;color:var(--muted);text-align:right}
+    .sem-provas{text-align:center;padding:40px 18px}
+    .sem-provas .ic{font-size:50px;margin-bottom:14px;opacity:.4}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const S={tela:'loading',prova:null,provaId:null,listaProvas:null,aluno:null,qi:0,respostas:{},resultado:null};
+
+async function init(){
+  try{
+    const listRes=await fetch('/api/provas-ativas');
+    const provas=await listRes.json();
+    if(!provas||provas.length===0){S.tela='sem-prova';render();return;}
+    if(provas.length===1){S.provaId=provas[0].id;await carregarProva(provas[0].id);return;}
+    S.listaProvas=provas;S.tela='selecao';
+  }catch{S.tela='sem-prova';}
+  render();
+}
+
+async function carregarProva(id){
+  try{
+    S.provaId=id;localStorage.setItem('provaId',id);
+    const r=await fetch(`/api/prova?id=${id}`);
+    if(!r.ok){alert('Prova não disponível.');S.tela='sem-prova';render();return;}
+    S.prova=await r.json();S.tela='inicio';
+  }catch{S.tela='sem-prova';}
+  render();
+}
+
+function render(){
+  const a=document.getElementById('app');
+  if(S.tela==='loading'){a.innerHTML='<div class="sem-prova"><div class="ic">⏳</div><p style="color:var(--muted)">Carregando…</p></div>';return;}
+  if(S.tela==='sem-prova'){a.innerHTML='<div class="sem-prova"><div class="ic">🔒</div><h2 style="color:var(--muted);font-size:1.1rem;margin-bottom:7px">Nenhuma prova ativa</h2><p style="color:var(--muted);font-size:.88rem">Aguarde seu professor ativar a prova.</p></div>';return;}
+  if(S.tela==='selecao'){renderSelecao();return;}
+  if(S.tela==='inicio'){renderInicio();return;}
+  if(S.tela==='questao'){renderQuestao();return;}
+  if(S.tela==='revisao'){renderRevisao();return;}
+  if(S.tela==='resultado'){renderResultado();return;}
+}
+
+// ── Seleção de prova ────────────────────────────────────────────────────────
+function renderSelecao(){
+  const lista=S.listaProvas;
+  const itens=lista.map(p=>{
+    return `<div class="prova-item" onclick="carregarProva('${p.id}')">
+      <div class="prova-icon"><i class="bi bi-file-text"></i></div>
+      <div class="prova-info">
+        <div class="prova-titulo">${p.titulo}</div>
+        <div class="prova-disciplina">${p.disciplina}</div>
+      </div>
+      <div class="prova-qtd">Selecionar</div>
+    </div>`;
+  }).join('');
+  document.getElementById('app').innerHTML=`
+    <div class="tela-selecao">
+      <div class="sel-card">
+        <div class="sel-hd">
+          <div class="sel-ic">📋</div>
+          <div class="sel-title">Seleção de Prova</div>
+          <div class="sel-sub">Escolha qual prova você irá realizar</div>
+        </div>
+        <div class="prova-lista">${itens}</div>
+      </div>
+    </div>`;
+}
+
+// ── Início com campos dinâmicos ──────────────────────────────────────────────
+function renderInicio(){
+  const p=S.prova;
+  const campos=p.camposAluno||[];
+  document.getElementById('app').innerHTML=`
+    <div class="tela-inicio">
+      <div class="inicio-card">
+        <div class="inicio-hd">
+          <div class="inicio-ic">📝</div>
+          <div class="inicio-title">${p.titulo}</div>
+          <div class="inicio-sub">${p.disciplina} · ${p.questoes.length} questões</div>
+        </div>
+        ${campos.map(c=>renderCampoAluno(c)).join('')}
+        <button class="btn-iniciar" onclick="iniciarProva()"><i class="bi bi-play-fill me-1"></i>Iniciar Prova</button>
+      </div>
+    </div>`;
+}
+
+function renderCampoAluno(c){
+  const req=c.obrigatorio?'required':'';
+  const reqMark=c.obrigatorio?'<span style="color:var(--danger);margin-left:2px">*</span>':'';
+  let input='';
+  if(c.tipo==='text')input=`<input type="text" id="campo-${c.id}" ${req} placeholder="${c.label}"/>`;
+  else if(c.tipo==='textarea')input=`<textarea id="campo-${c.id}" ${req} placeholder="${c.label}"></textarea>`;
+  else if(c.tipo==='select')input=`<select id="campo-${c.id}" ${req}><option value="">— Selecione —</option>${(c.opcoes||[]).map(o=>`<option value="${o.value}">${o.label}</option>`).join('')}</select>`;
+  else if(c.tipo==='radio')input=`<div class="check-group">${(c.opcoes||[]).map(o=>`<label class="check-item"><input type="radio" name="campo-${c.id}" value="${o.value}" ${req}/>${o.label}</label>`).join('')}</div>`;
+  else if(c.tipo==='checkbox')input=`<div class="check-group">${(c.opcoes||[]).map(o=>`<label class="check-item"><input type="checkbox" name="campo-${c.id}" value="${o.value}"/>${o.label}</label>`).join('')}</div>`;
+  return `<div class="ff"><label>${c.label}${reqMark}</label>${input}</div>`;
+}
+
+function iniciarProva(){
+  const p=S.prova;
+  const campos=p.camposAluno||[];
+  const aluno={};
+  for(const c of campos){
+    if(c.tipo==='radio'){
+      const checked=document.querySelector(`input[name="campo-${c.id}"]:checked`);
+      if(c.obrigatorio&&!checked){alert(`Preencha o campo: ${c.label}`);return;}
+      aluno[c.label]=checked?.value||'';
+    } else if(c.tipo==='checkbox'){
+      const checked=[...document.querySelectorAll(`input[name="campo-${c.id}"]:checked`)].map(el=>el.value);
+      aluno[c.label]=checked;
+    } else {
+      const el=document.getElementById(`campo-${c.id}`);
+      if(c.obrigatorio&&!el?.value?.trim()){alert(`Preencha o campo: ${c.label}`);return;}
+      aluno[c.label]=el?.value||'';
+    }
+  }
+  S.aluno=aluno;S.tela='questao';S.qi=0;render();
+}
+
+// ── Questão ──────────────────────────────────────────────────────────────────
+function renderQuestao(){
+  const p=S.prova;
+  const q=p.questoes[S.qi];
+  const total=p.questoes.length;
+  const resp=Object.keys(S.respostas).length;
+  const pct=Math.round((resp/total)*100);
+  const tiposLbl={multipla:'Múltipla Escolha',vf:'Verdadeiro ou Falso',lacuna:'Preencher Lacunas'};
+  const tiposCls={multipla:'tm',vf:'tv',lacuna:'tl'};
+  const ehUlt=S.qi===total-1;
+  const bullets=p.questoes.map((_,i)=>{
+    let cls='bullet';
+    if(i===S.qi)cls+=' curr';
+    else if(S.respostas[p.questoes[i].id]!==undefined)cls+=' resp';
+    return `<div class="${cls}" onclick="irQ(${i})">${i+1}</div>`;
+  }).join('');
+  // Nome do aluno para header
+  const nomeAluno=Object.values(S.aluno||{})[0]||'';
+  document.getElementById('app').innerHTML=`
+    <div class="header">
+      <div class="header-brand"><div class="hdot"></div><span>${p.titulo}</span></div>
+      <div class="header-info">${nomeAluno}</div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-outer"><div class="prog-inner" style="width:${pct}%"></div></div>
+      <div class="prog-labels"><span>${resp} de ${total} respondidas</span><span>${pct}% concluído</span></div>
+    </div>
+    <div class="bullets">${bullets}</div>
+    <div class="wrap">
+      <div class="card-q">
+        <div class="q-hd">
+          <div class="q-num">${q.numero}</div>
+          <span class="q-tipo ${tiposCls[q.tipo]}">${tiposLbl[q.tipo]}</span>
+          <span class="q-val">${q.valor} pt${q.valor!==1?'s':''}</span>
+        </div>
+        <div class="q-env">${q.enunciado}</div>
+        <div id="resp-area">${renderRespArea(q)}</div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="btn-nav btn-ant" onclick="navAnt()" ${S.qi===0?'disabled style="opacity:.4;cursor:default"':''}>
+        <i class="bi bi-arrow-left"></i> Anterior
+      </button>
+      ${ehUlt
+        ?`<button class="btn-nav btn-env" onclick="irRevisao()"><i class="bi bi-list-check me-1"></i>Revisar e Enviar</button>`
+        :`<button class="btn-nav btn-prx" onclick="navProx()">Próxima <i class="bi bi-arrow-right"></i></button>`}
+    </div>`;
+}
+
+function renderRespArea(q){
+  if(q.tipo==='multipla')return renderMultipla(q);
+  if(q.tipo==='vf')return renderVF(q);
+  if(q.tipo==='lacuna')return renderLacuna(q);
+  return '';
+}
+
+function renderMultipla(q){
+  const sel=S.respostas[q.id]||[];
+  const temMult=true; // sempre permite múltipla seleção
+  return `
+    <div class="multi-hint"><i class="bi bi-info-circle me-1"></i>Pode haver mais de uma resposta correta. Você ganha pontos por cada correta marcada <strong>e</strong> por cada errada que deixar em branco.</div>
+    ${q.opcoes.map((op,i)=>{
+      const isSel=sel.includes(op.id);
+      return `<button class="op-btn ${isSel?'sel':''}" onclick="toggleMultipla('${q.id}','${op.id}')">
+        <div class="op-letra">${String.fromCharCode(65+i)}</div>
+        ${op.texto}
+        ${isSel?'<i class="bi bi-check-circle ms-auto" style="color:var(--accent)"></i>':''}
+      </button>`;
+    }).join('')}`;
+}
+
+function renderVF(q){
+  const resps=S.respostas[q.id]||{};
+  return `<table class="vf-table">${q.afirmativas.map(af=>`
+    <tr class="vf-row">
+      <td class="vf-txt">${af.texto}</td>
+      <td class="vf-act">
+        <button class="vf-btn ${resps[af.id]===true?'va':''}" onclick="selVF('${q.id}','${af.id}',true)">Verdadeiro</button>
+        <button class="vf-btn ${resps[af.id]===false?'fa':''}" onclick="selVF('${q.id}','${af.id}',false)">Falso</button>
+      </td>
+    </tr>`).join('')}</table>`;
+}
+
+function renderLacuna(q){
+  const resps=S.respostas[q.id]||{};
+  let txt=q.textoComLacunas;
+  for(const lac of q.lacunas){
+    const sel=resps[lac.id]||'';
+    const opts=['',  ...lac.opcoes].map(o=>`<option value="${o}" ${o===sel?'selected':''}>${o||'— selecione —'}</option>`).join('');
+    const cls=sel?'lac-sel prec':'lac-sel';
+    txt=txt.replace(`{{${lac.posicao}}}`,`<select class="${cls}" onchange="selLacuna('${q.id}','${lac.id}',this.value)">${opts}</select>`);
+  }
+  return `<div class="lac-wrap">${txt}</div>`;
+}
+
+// ── Ações de resposta ────────────────────────────────────────────────────────
+function toggleMultipla(qid,oid){
+  let sel=S.respostas[qid]||[];
+  if(sel.includes(oid)) sel=sel.filter(x=>x!==oid);
+  else sel=[...sel,oid];
+  S.respostas[qid]=sel.length?sel:undefined;
+  if(!sel.length) delete S.respostas[qid];
+  renderQuestao();
+}
+
+function selVF(qid,afid,val){
+  if(!S.respostas[qid])S.respostas[qid]={};
+  S.respostas[qid][afid]=val;
+  renderQuestao();
+}
+
+function selLacuna(qid,lacid,val){
+  if(!S.respostas[qid])S.respostas[qid]={};
+  S.respostas[qid][lacid]=val;
+  // Sem re-render completo, só atualiza o select visualmente
+  const q=S.prova.questoes.find(x=>x.id===qid);
+  if(q&&q.lacunas.every(l=>S.respostas[qid][l.id])){
+    // todas preenchidas: atualiza bullets
+    atualizarBullets();
+  }
+}
+
+function atualizarBullets(){
+  const p=S.prova;
+  const bullets=document.querySelectorAll('.bullet');
+  bullets.forEach((b,i)=>{
+    b.className='bullet';
+    if(i===S.qi)b.classList.add('curr');
+    else if(temResposta(p.questoes[i]))b.classList.add('resp');
+  });
+}
+
+// ── Navegação ────────────────────────────────────────────────────────────────
+function navAnt(){if(S.qi>0){S.qi--;render();}}
+function navProx(){if(S.qi<S.prova.questoes.length-1){S.qi++;render();}}
+function irQ(i){S.qi=i;S.tela='questao';render();}
+function irRevisao(){S.tela='revisao';render();}
+
+// ── Revisão ──────────────────────────────────────────────────────────────────
+function renderRevisao(){
+  const p=S.prova;
+  const pend=p.questoes.filter(q=>!temResposta(q)).length;
+  const nomeAluno=Object.values(S.aluno||{})[0]||'';
+  const itens=p.questoes.map(q=>{
+    const ok=temResposta(q);
+    return `<div class="rev-item ${ok?'resp':'pend'}" onclick="irQ(${q.numero-1})">
+      <div class="rev-num ${ok?'rn-ok':'rn-pd'}">${q.numero}</div>
+      <div style="font-size:.8rem">
+        <strong style="display:block">Questão ${q.numero}</strong>
+        <span style="color:var(--muted);font-size:.72rem">${ok?'✓ Respondida':'⚠ Pendente'} · ${q.valor}pt</span>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('app').innerHTML=`
+    <div class="header">
+      <div class="header-brand"><div class="hdot"></div><span>${p.titulo}</span></div>
+      <div class="header-info">${nomeAluno}</div>
+    </div>
+    <div class="tela-rev">
+      <div class="rev-card">
+        <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px">Revisão da Prova</div>
+        <div style="color:var(--muted);font-size:.83rem;margin-bottom:20px">Clique em qualquer questão para voltar e alterar.</div>
+        ${pend>0?`<div style="background:#fffbf2;border:1px solid #f5c96a;border-radius:7px;padding:9px 13px;margin-bottom:18px;font-size:.83rem;color:var(--warning)"><i class="bi bi-exclamation-triangle me-1"></i><strong>${pend} questão(ões) sem resposta.</strong> Você pode enviar assim mesmo.</div>`:''}
+        <div class="rev-grid">${itens}</div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="btn-nav btn-ant" onclick="S.tela='questao';S.qi=${p.questoes.length-1};render()">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </button>
+      <button class="btn-nav btn-env" onclick="confirmarEnvio()">
+        <i class="bi bi-send me-1"></i> Enviar Prova
+      </button>
+    </div>`;
+}
+
+function temResposta(q){
+  const r=S.respostas[q.id];
+  if(r===undefined||r===null)return false;
+  if(q.tipo==='multipla')return Array.isArray(r)&&r.length>0;
+  if(q.tipo==='vf')return typeof r==='object'&&Object.keys(r).length>0;
+  if(q.tipo==='lacuna')return typeof r==='object'&&Object.keys(r).length>0;
+  return false;
+}
+
+// ── Envio ────────────────────────────────────────────────────────────────────
+function confirmarEnvio(){
+  if(!confirm('Confirmar envio da prova? Esta ação não pode ser desfeita.'))return;
+  enviarProva();
+}
+
+async function enviarProva(){
+  const p=S.prova;
+  const respostasArr=p.questoes.map(q=>{
+    const r=S.respostas[q.id];
+    if(q.tipo==='multipla')return{tipo:'multipla',questaoId:q.id,opcoesSelecionadas:Array.isArray(r)?r:[]};
+    if(q.tipo==='vf')return{tipo:'vf',questaoId:q.id,respostas:r||{}};
+    if(q.tipo==='lacuna')return{tipo:'lacuna',questaoId:q.id,respostas:r||{}};
+  }).filter(Boolean);
+  try{
+    const res=await fetch('/api/submeter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provaId:S.provaId,aluno:S.aluno,respostas:respostasArr})});
+    S.resultado=await res.json();S.tela='resultado';render();
+  }catch{alert('Erro ao enviar. Tente novamente.');}
+}
+
+// ── Resultado ────────────────────────────────────────────────────────────────
+function renderResultado(){
+  const r=S.resultado;
+  const pct=r.notaMaxima>0?Math.round((r.notaTotal/r.notaMaxima)*100):0;
+  const acertos=r.resultadosPorQuestao.filter(q=>q.pontosObtidos===q.valorTotal).length;
+  const nomeAluno=Object.values(r.aluno||{})[0]||'';
+  document.getElementById('app').innerHTML=`
+    <div class="tela-res">
+      <div class="res-card">
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:18px">Resultado Final</div>
+        <div class="nota-circle">
+          <div class="nota-num">${r.notaTotal}</div>
+          <div class="nota-max">de ${r.notaMaxima}</div>
+        </div>
+        <div style="font-size:1.25rem;font-weight:800;margin-bottom:5px">${nomeAluno}</div>
+        <div style="color:var(--muted);font-size:.85rem;margin-bottom:22px">${r.provaTitle}</div>
+        <div class="det-grid">
+          <div class="det-item"><div class="det-label">Aproveitamento</div><div class="det-val" style="color:var(--accent)">${pct}%</div></div>
+          <div class="det-item"><div class="det-label">Questões certas</div><div class="det-val">${acertos}/${r.resultadosPorQuestao.length}</div></div>
+          <div class="det-item"><div class="det-label">Nota obtida</div><div class="det-val" style="color:var(--success)">${r.notaTotal}</div></div>
+          <div class="det-item"><div class="det-label">Nota máxima</div><div class="det-val">${r.notaMaxima}</div></div>
+        </div>
+        <div style="background:var(--sl);border:1px solid #b3edd9;border-radius:9px;padding:13px;font-size:.83rem;color:var(--success)">
+          <i class="bi bi-check-circle me-2"></i>Resultado salvo com sucesso.
+        </div>
+      </div>
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
