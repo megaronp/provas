@@ -1,0 +1,62 @@
+{
+  "id": "0a399f72-f028-4370-9d18-23a7fff8daee",
+  "titulo": "Prova 2",
+  "disciplina": "teste 2",
+  "googleSheetId": "1H7fYDUbG0oui-Ipch8uzBAnOsJ94DahD65c6EAdAIiE",
+  "dataCriacao": "2026-04-17T15:15:50.472Z",
+  "questoes": [
+    {
+      "tipo": "multipla",
+      "valor": 3,
+      "enunciado": "teste",
+      "opcoes": [
+        {
+          "id": "op-0",
+          "texto": "a",
+          "correta": true
+        },
+        {
+          "id": "op-1",
+          "texto": "b",
+          "correta": false
+        },
+        {
+          "id": "op-2",
+          "texto": "c",
+          "correta": false
+        },
+        {
+          "id": "op-3",
+          "texto": "d",
+          "correta": false
+        }
+      ],
+      "id": "82d6df92-aa8e-4488-8e95-cf14f95ae88b",
+      "numero": 1
+    }
+  ],
+  "camposAluno": [
+    {
+      "id": "campo-nome",
+      "tipo": "text",
+      "label": "Nome completo",
+      "obrigatorio": true,
+      "ordem": 0
+    },
+    {
+      "id": "campo-matricula",
+      "tipo": "text",
+      "label": "Matrícula",
+      "obrigatorio": true,
+      "ordem": 1
+    },
+    {
+      "id": "campo-data",
+      "tipo": "text",
+      "label": "Data",
+      "obrigatorio": true,
+      "ordem": 2
+    }
+  ],
+  "ativa": false
+}

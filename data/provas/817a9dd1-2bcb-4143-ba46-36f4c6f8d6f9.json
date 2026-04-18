@@ -1,0 +1,203 @@
+{
+  "id": "817a9dd1-2bcb-4143-ba46-36f4c6f8d6f9",
+  "titulo": "Adaptação",
+  "disciplina": "Mestrado",
+  "googleSheetId": "1OAmph8kb2bYKpdl1UMNMeU7r7uoS7GTTncUy2-6Oz7M",
+  "dataCriacao": "2026-04-17T17:07:30.912Z",
+  "questoes": [
+    {
+      "tipo": "multipla",
+      "valor": 1,
+      "enunciado": "1",
+      "opcoes": [
+        {
+          "id": "op-0",
+          "texto": "A",
+          "correta": false
+        },
+        {
+          "id": "op-1",
+          "texto": "B",
+          "correta": false
+        },
+        {
+          "id": "op-2",
+          "texto": "C",
+          "correta": false
+        },
+        {
+          "id": "op-3",
+          "texto": "D",
+          "correta": true
+        }
+      ],
+      "id": "0fd1a170-434c-4bee-8179-b3406aa1605d",
+      "numero": 1
+    },
+    {
+      "tipo": "vf",
+      "valor": 4,
+      "enunciado": "2",
+      "afirmativas": [
+        {
+          "id": "af-0",
+          "texto": "A",
+          "correta": true
+        },
+        {
+          "id": "af-1",
+          "texto": "B",
+          "correta": false
+        },
+        {
+          "id": "af-2",
+          "texto": "C",
+          "correta": true
+        },
+        {
+          "id": "af-3",
+          "texto": "D",
+          "correta": true
+        }
+      ],
+      "id": "dbfe689d-2f5f-4f56-973f-4f62791ba0e1",
+      "numero": 2
+    },
+    {
+      "tipo": "multipla",
+      "valor": 1,
+      "enunciado": "3",
+      "opcoes": [
+        {
+          "id": "op-0",
+          "texto": "a",
+          "correta": false
+        },
+        {
+          "id": "op-1",
+          "texto": "b",
+          "correta": false
+        },
+        {
+          "id": "op-2",
+          "texto": "c",
+          "correta": true
+        },
+        {
+          "id": "op-3",
+          "texto": "d",
+          "correta": false
+        }
+      ],
+      "id": "8e29a262-12c0-4779-98f1-a826606bfa76",
+      "numero": 3
+    },
+    {
+      "tipo": "lacuna",
+      "valor": 3,
+      "enunciado": "4",
+      "textoComLacunas": "Trata-se de {{0}} , fruto de estudo cujo tratamento dos dados é {{1}}, que pretende {{2}} os níveis de dificuldades antecipadas e sentidas por estudantes ingressantes no ensino superior de uma universidade do norte de Portugal.",
+      "lacunas": [
+        {
+          "id": "lac-0",
+          "posicao": 0,
+          "opcoes": [
+            "artigo jornalístico",
+            "artigo acadêmico",
+            "relato de pesquisa",
+            "texto de divulgação"
+          ],
+          "correta": "artigo acadêmico"
+        },
+        {
+          "id": "lac-1",
+          "posicao": 1,
+          "opcoes": [
+            "quantitativo",
+            "qualitativo",
+            "bibliográfico",
+            "de levantamento"
+          ],
+          "correta": "quantitativo"
+        },
+        {
+          "id": "lac-2",
+          "posicao": 2,
+          "opcoes": [
+            "perpassar",
+            "solucionar",
+            "minimizar",
+            "explorar"
+          ],
+          "correta": "explorar"
+        }
+      ],
+      "id": "d481abd0-5e6a-4675-b6cb-b7ea2fe130a7",
+      "numero": 4
+    },
+    {
+      "tipo": "lacuna",
+      "valor": 1,
+      "enunciado": "teste",
+      "blocoPalavras": [
+        "Aqui",
+        "for",
+        "Palhoça",
+        "isso",
+        "corriga",
+        "nada",
+        "comida",
+        "loja",
+        "avião"
+      ],
+      "subtipo": "bloco",
+      "textoComLacunas": "Teste {{0}}, quando {{1}} for fazer isso {{2}}.",
+      "lacunas": [
+        {
+          "id": "lac-0",
+          "posicao": 0,
+          "opcoes": [],
+          "correta": "Aqui"
+        },
+        {
+          "id": "lac-1",
+          "posicao": 1,
+          "opcoes": [],
+          "correta": "isso"
+        },
+        {
+          "id": "lac-2",
+          "posicao": 2,
+          "opcoes": [],
+          "correta": "loja"
+        }
+      ],
+      "id": "81f0db95-13a5-4c1d-acb0-a6d9daba2261",
+      "numero": 5
+    }
+  ],
+  "camposAluno": [
+    {
+      "id": "campo-nome",
+      "tipo": "text",
+      "label": "Nome completo",
+      "obrigatorio": true,
+      "ordem": 0
+    },
+    {
+      "id": "campo-matricula",
+      "tipo": "text",
+      "label": "Matrícula",
+      "obrigatorio": true,
+      "ordem": 1
+    },
+    {
+      "id": "campo-data",
+      "tipo": "text",
+      "label": "Data",
+      "obrigatorio": true,
+      "ordem": 2
+    }
+  ],
+  "ativa": true
+}

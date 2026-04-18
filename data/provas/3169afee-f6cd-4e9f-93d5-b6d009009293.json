@@ -1,0 +1,136 @@
+{
+  "id": "3169afee-f6cd-4e9f-93d5-b6d009009293",
+  "titulo": "Prova",
+  "disciplina": "teste",
+  "googleSheetId": "1OAmph8kb2bYKpdl1UMNMeU7r7uoS7GTTncUy2-6Oz7M",
+  "dataCriacao": "2026-04-17T04:09:54.129Z",
+  "questoes": [
+    {
+      "tipo": "multipla",
+      "valor": 4,
+      "enunciado": "teste",
+      "opcoes": [
+        {
+          "id": "op-0",
+          "texto": "a",
+          "correta": true
+        },
+        {
+          "id": "op-1",
+          "texto": "b",
+          "correta": true
+        },
+        {
+          "id": "op-2",
+          "texto": "c",
+          "correta": false
+        },
+        {
+          "id": "op-3",
+          "texto": "d",
+          "correta": false
+        }
+      ],
+      "id": "eb37935e-ed67-4ec0-8d27-fab092b9e442",
+      "numero": 1
+    },
+    {
+      "tipo": "vf",
+      "valor": 4,
+      "enunciado": "teste 2",
+      "afirmativas": [
+        {
+          "id": "af-0",
+          "texto": "a",
+          "correta": true
+        },
+        {
+          "id": "af-1",
+          "texto": "b",
+          "correta": false
+        },
+        {
+          "id": "af-2",
+          "texto": "c",
+          "correta": true
+        },
+        {
+          "id": "af-3",
+          "texto": "d",
+          "correta": false
+        }
+      ],
+      "id": "d0ce532b-aa45-48d5-aaf5-2e8b49271a4c",
+      "numero": 2
+    },
+    {
+      "tipo": "lacuna",
+      "valor": 2,
+      "enunciado": "Teste",
+      "textoComLacunas": "Uma palavra {{0}}, depois outra {{1}} aqui para finalizar",
+      "lacunas": [
+        {
+          "id": "lac-0",
+          "posicao": 0,
+          "opcoes": [
+            "aqui",
+            "lá"
+          ],
+          "correta": "aqui"
+        },
+        {
+          "id": "lac-1",
+          "posicao": 1,
+          "opcoes": [
+            "palavra",
+            "jogo"
+          ],
+          "correta": "palavra"
+        }
+      ],
+      "id": "cfde807d-718c-4796-896f-85aa1ad153d2",
+      "numero": 3
+    }
+  ],
+  "camposAluno": [
+    {
+      "id": "campo-nome",
+      "tipo": "text",
+      "label": "Nome completo",
+      "obrigatorio": true,
+      "ordem": 0
+    },
+    {
+      "id": "campo-matricula",
+      "tipo": "text",
+      "label": "Matrícula",
+      "obrigatorio": true,
+      "ordem": 1
+    },
+    {
+      "id": "campo-data",
+      "tipo": "text",
+      "label": "Data",
+      "obrigatorio": true,
+      "ordem": 2
+    },
+    {
+      "id": "campo-1776399269907",
+      "tipo": "radio",
+      "label": "Sexo",
+      "obrigatorio": false,
+      "opcoes": [
+        {
+          "label": "Masculino",
+          "value": "masculino"
+        },
+        {
+          "label": "Feminino",
+          "value": "feminino"
+        }
+      ],
+      "ordem": 3
+    }
+  ],
+  "ativa": false
+}
