@@ -118,8 +118,9 @@
     <span>ProvaSystem</span>
   </div>
   <div class="nav-tabs-top">
-    <a class="nav-tab active" href="/admin"><i class="bi bi-pencil-square"></i> Editor</a>
+    <a class="nav-tab" href="/admin"><i class="bi bi-pencil-square"></i> Editor</a>
     <a class="nav-tab" href="/admin/relatorio"><i class="bi bi-bar-chart-line"></i> Relatórios</a>
+    <a class="nav-tab" href="/admin/config"><i class="bi bi-gear"></i> Configurações</a>
     <a class="nav-tab" href="/" target="_blank"><i class="bi bi-person-check"></i> Área do Aluno</a>
   </div>
 </div>
@@ -209,7 +210,8 @@
     <div class="inline-grid-2" style="margin-bottom:14px">
       <div class="fg" style="margin:0"><label>Tipo</label>
         <select id="q-tipo" onchange="renderCamposTipo()">
-          <option value="multipla">Múltipla Escolha</option>
+          <option value="multipla">Múltipla Escolha (múltiplas)</option>
+          <option value="multipla-simples">Múltipla Escolha (única)</option>
           <option value="vf">Verdadeiro ou Falso</option>
           <option value="lacuna">Preencher Lacunas</option>
         </select>
@@ -522,6 +524,7 @@ function renderCamposTipo(q=null) {
   const tipo=document.getElementById('q-tipo').value;
   const c=document.getElementById('campos-tipo');
   if (tipo==='multipla') c.innerHTML=renderMultiplaForm(q?.tipo==='multipla'?q:null);
+  else if (tipo==='multipla-simples') c.innerHTML=renderMultiplaSimplesForm(q?.tipo==='multipla-simples'?q:null);
   else if (tipo==='vf') c.innerHTML=renderVFForm(q?.tipo==='vf'?q:null);
   else c.innerHTML=renderLacunaForm(q?.tipo==='lacuna'?q:null);
 }
@@ -532,6 +535,24 @@ function renderMultiplaForm(q) {
     <div class="sec-title" style="margin-bottom:9px">Opções (marque todas as corretas com ✓)</div>
     <div style="font-size:.75rem;color:var(--warning);margin-bottom:10px;padding:8px 12px;background:rgba(247,168,79,.08);border:1px solid rgba(247,168,79,.2);border-radius:7px">
       <i class="bi bi-info-circle me-1"></i>Pode ter mais de uma correta. Pontuação: <strong>+1 unidade</strong> por correta marcada, <strong>+1 unidade</strong> por errada não marcada. Total de unidades = total de opções.
+    </div>
+    <div id="opcoes-lista">
+      ${opcoes.map((op,i)=>`
+        <div class="op-row">
+          <input type="checkbox" ${op.correta?'checked':''} title="Marcar como correta"/>
+          <input type="text" placeholder="Opção ${String.fromCharCode(65+i)}" value="${op.texto}"/>
+          ${i>=2?`<button class="btn-ic del" onclick="this.parentElement.remove()" title="Remover"><i class="bi bi-x"></i></button>`:''}
+        </div>`).join('')}
+    </div>
+    <button class="add-btn" onclick="adicionarOpcaoMultipla()"><i class="bi bi-plus me-1"></i>Adicionar opção</button>`;
+}
+
+function renderMultiplaSimplesForm(q) {
+  const opcoes=q?.opcoes||[{id:'op-0',texto:'',correta:true},{id:'op-1',texto:'',correta:false},{id:'op-2',texto:'',correta:false},{id:'op-3',texto:'',correta:false}];
+  return `
+    <div class="sec-title" style="margin-bottom:9px">Opções (marque a única correta com ✓)</div>
+    <div style="font-size:.75rem;color:var(--warning);margin-bottom:10px;padding:8px 12px;background:rgba(247,168,79,.08);border:1px solid rgba(247,168,79,.2);border-radius:7px">
+      <i class="bi bi-info-circle me-1"></i>Apenas uma resposta correta. Pontuação: <strong>100%</strong> se acertar, <strong>0%</strong> se errar.
     </div>
     <div id="opcoes-lista">
       ${opcoes.map((op,i)=>`
@@ -589,15 +610,31 @@ function adicionarAfirmativa(){
 }
 
 function renderLacunaForm(q) {
+  const subtipo = q?.subtipo || 'opcoes';
   return `
+    <div class="fg"><label>Tipo de Preenchimento</label>
+      <select id="lacuna-subtipo" onchange="toggleLacunaSubtipo()">
+        <option value="opcoes" ${subtipo==='opcoes'?'selected':''}>Opções por lacuna (dropdown)</option>
+        <option value="bloco" ${subtipo==='bloco'?'selected':''}>Bloco de palavras</option>
+      </select>
+    </div>
     <div class="fg"><label>Texto com Lacunas</label>
       <textarea id="lacuna-texto" placeholder="Use {{0}}, {{1}}, etc.\nEx: O Brasil foi descoberto em {{0}} por {{1}}." style="min-height:90px">${q?.textoComLacunas||''}</textarea>
       <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Cada <code style="color:var(--accent2)">{{N}}</code> vira uma lacuna numerada.</div>
     </div>
-    <div class="lac-sec">
+    <div class="lac-sec" id="lacuna-opcoes-sec" ${subtipo==='bloco'?'style="display:none"':''}>
       <div class="sec-title">Configurar Lacunas</div>
       <div id="lacunas-config">${q?renderLacunasConfig(q):''}</div>
       <button class="add-btn" onclick="detectarLacunas()"><i class="bi bi-arrow-clockwise me-1"></i>Detectar lacunas do texto</button>
+    </div>
+    <div class="lac-sec" id="lacuna-bloco-sec" ${subtipo!=='bloco'?'style="display:none"':''}>
+      <div class="sec-title">Bloco de Palavras</div>
+      <div class="fg"><label>Palavras disponíveis</label>
+        <textarea id="lacuna-bloco-texto" placeholder="Uma palavra por linha ou separadas por vírgula" style="min-height:80px">${(q?.blocoPalavras||[]).join('\n')}</textarea>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Essas palavras aparecerão num bloco para o aluno arrastar.</div>
+      </div>
+      <div id="bloco-lacunas-config">${subtipo==='bloco'&&q?renderBlocoLacunasConfig(q):''}</div>
+      <button class="add-btn" onclick="detectarBlocoLacunas()"><i class="bi bi-arrow-clockwise me-1"></i>Detectar lacunas do texto</button>
     </div>`;
 }
 
@@ -647,6 +684,33 @@ function addLacOpcao(i){
   l.appendChild(d);
 }
 
+function toggleLacunaSubtipo(){
+  const subtipo=document.getElementById('lacuna-subtipo').value;
+  document.getElementById('lacuna-opcoes-sec').style.display=subtipo==='opcoes'?'':'none';
+  document.getElementById('lacuna-bloco-sec').style.display=subtipo==='bloco'?'':'none';
+}
+
+function renderBlocoLacunasConfig(q){
+  return q.lacunas.map(lac=>`
+    <div class="lac-item">
+      <div class="lac-hd">Lacuna {{${lac.posicao}}}</div>
+      <div class="fg" style="margin-bottom:7px"><label>Resposta correta</label>
+        <input type="text" id="lc-${lac.posicao}" value="${lac.correta}" placeholder="Palavra correta"/>
+      </div>
+    </div>`).join('');
+}
+
+function detectarBlocoLacunas(){
+  const txt=document.getElementById('lacuna-texto').value;
+  const matches=[...txt.matchAll(/\{\{(\d+)\}\}/g)];
+  const idxs=[...new Set(matches.map(m=>parseInt(m[1])))].sort((a,b)=>a-b);
+  document.getElementById('bloco-lacunas-config').innerHTML=idxs.map(i=>`
+    <div class="lac-item">
+      <div class="lac-hd">Lacuna {{${i}}}</div>
+      <div class="fg" style="margin-bottom:7px"><label>Resposta correta</label><input type="text" id="lc-${i}" placeholder="Palavra correta"/></div>
+    </div>`).join('');
+}
+
 // ── Salvar Questão ───────────────────────────────────────────────────────────
 async function salvarQuestao(){
   const tipo=document.getElementById('q-tipo').value;
@@ -681,15 +745,30 @@ async function salvarQuestao(){
   if (tipo==='lacuna'){
     const texto=document.getElementById('lacuna-texto')?.value.trim();
     if (!texto){toast('Digite o texto com lacunas','err');return;}
+    const subtipo=document.getElementById('lacuna-subtipo').value;
     const matches=[...texto.matchAll(/\{\{(\d+)\}\}/g)];
     const idxs=[...new Set(matches.map(m=>parseInt(m[1])))].sort((a,b)=>a-b);
-    const lacunas=idxs.map(i=>{
-      const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
-      const opEls=document.getElementById(`lo-${i}`)?.children||[];
-      const opcoes=[...opEls].map(row=>row.querySelector('input[type=text]').value.trim()).filter(Boolean);
-      return {id:`lac-${i}`,posicao:i,opcoes,correta};
-    });
-    if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
+    let lacunas=[];
+    if (subtipo==='opcoes'){
+      lacunas=idxs.map(i=>{
+        const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
+        const opEls=document.getElementById(`lo-${i}`)?.children||[];
+        const opcoes=[...opEls].map(row=>row.querySelector('input[type=text]').value.trim()).filter(Boolean);
+        return {id:`lac-${i}`,posicao:i,opcoes,correta};
+      });
+      if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
+    }else{
+      lacunas=idxs.map(i=>{
+        const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
+        return {id:`lac-${i}`,posicao:i,opcoes:[],correta};
+      });
+      if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
+      const blocoTexto=document.getElementById('lacuna-bloco-texto')?.value.trim();
+      const blocoPalavras=blocoTexto?[...new Set(blocoTexto.split(/[\n,]+/).map(p=>p.trim()).filter(Boolean))]:[];
+      if (blocoPalavras.length<lacunas.length+2){toast('Adicione ao menos '+(lacunas.length+2)+' palavras','err');return;}
+      payload.blocoPalavras=blocoPalavras;
+    }
+    payload.subtipo=subtipo;
     payload.textoComLacunas=texto;
     payload.lacunas=lacunas;
   }

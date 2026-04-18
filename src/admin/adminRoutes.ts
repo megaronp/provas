@@ -19,10 +19,9 @@ function provaPath(id: string) {
 }
 
 function salvarProva(prova: Prova): void {
-  // Salva no arquivo permanente da prova
   fs.writeFileSync(provaPath(prova.id), JSON.stringify(prova, null, 2));
-  // Atualiza o ponteiro da prova ativa
-  fs.writeFileSync(PROVA_ATIVA_PATH, JSON.stringify({ id: prova.id }, null, 2));
+  const ativaData = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+  fs.writeFileSync(PROVA_ATIVA_PATH, JSON.stringify({ ...ativaData, id: prova.id }, null, 2));
 }
 
 function carregarProva(id?: string): Prova | null {
@@ -61,6 +60,31 @@ router.get('/', (_req: Request, res: Response) => {
 
 router.get('/relatorio', (_req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'public', 'admin', 'relatorio.html'));
+});
+
+router.get('/config', (_req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'admin', 'config.html'));
+});
+
+router.get('/config/api', (_req: Request, res: Response) => {
+  try {
+    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+    res.json({ googleCredentials: data.googleCredentials || '' });
+  } catch {
+    res.json({ googleCredentials: '' });
+  }
+});
+
+router.put('/config/api', (req: Request, res: Response) => {
+  const { googleCredentials } = req.body;
+  try {
+    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+    data.googleCredentials = googleCredentials || '';
+    fs.writeFileSync(PROVA_ATIVA_PATH, JSON.stringify(data, null, 2));
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ erro: err.message });
+  }
 });
 
 // ── Provas ────────────────────────────────────────────────────────────────────
@@ -235,6 +259,29 @@ router.get('/relatorio/:id/csv', async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send('\uFEFF' + csv); // BOM para Excel reconhecer UTF-8
+  } catch (err: any) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// ── Configurações ───────────────────────────────────────────────────────────────
+
+router.get('/config', (_req: Request, res: Response) => {
+  try {
+    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+    res.json({ googleCredentials: data.googleCredentials || '' });
+  } catch {
+    res.json({ googleCredentials: '' });
+  }
+});
+
+router.put('/config', (req: Request, res: Response) => {
+  const { googleCredentials } = req.body;
+  try {
+    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+    data.googleCredentials = googleCredentials || '';
+    fs.writeFileSync(PROVA_ATIVA_PATH, JSON.stringify(data, null, 2));
+    res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ erro: err.message });
   }

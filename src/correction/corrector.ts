@@ -1,7 +1,7 @@
 import {
   Prova, Submissao, Resultado, ResultadoQuestao,
-  QuestaoMultipla, QuestaoVF, QuestaoLacuna,
-  RespostaMultipla, RespostaVF, RespostaLacuna
+  QuestaoMultipla, QuestaoMultiplaSimples, QuestaoVF, QuestaoLacuna,
+  RespostaMultipla, RespostaMultiplaSimples, RespostaVF, RespostaLacuna, RespostaLacunaBloco
 } from '../models/types';
 
 /**
@@ -35,6 +35,12 @@ function corrigirMultipla(questao: QuestaoMultipla, resposta: RespostaMultipla):
   const unidadesObtidas = corretasMarcadas + erradasNaoMarcadas;
 
   return parseFloat(((unidadesObtidas / totalOpcoes) * questao.valor).toFixed(2));
+}
+
+function corrigirMultiplaSimples(questao: QuestaoMultiplaSimples, resposta: RespostaMultiplaSimples): number {
+  if (!resposta.opcaoSelecionada) return 0;
+  const opcaoCorreta = questao.opcoes.find(o => o.correta);
+  return resposta.opcaoSelecionada === opcaoCorreta?.id ? questao.valor : 0;
 }
 
 /**
@@ -74,6 +80,19 @@ function corrigirLacuna(questao: QuestaoLacuna, resposta: RespostaLacuna): numbe
   return parseFloat(((acertos / total) * questao.valor).toFixed(2));
 }
 
+function corrigirLacunaBloco(questao: QuestaoLacuna, resposta: RespostaLacunaBloco): number {
+  const total = questao.lacunas.length;
+  if (total === 0) return 0;
+  let acertos = 0;
+  for (const lacuna of questao.lacunas) {
+    const respostaAluno = resposta.respostas[lacuna.id];
+    if (respostaAluno && respostaAluno.trim().toLowerCase() === lacuna.correta.trim().toLowerCase()) {
+      acertos++;
+    }
+  }
+  return parseFloat(((acertos / total) * questao.valor).toFixed(2));
+}
+
 export function corrigirSubmissao(prova: Prova, submissao: Submissao): Resultado {
   const resultadosPorQuestao: ResultadoQuestao[] = [];
 
@@ -84,10 +103,14 @@ export function corrigirSubmissao(prova: Prova, submissao: Submissao): Resultado
     if (resposta) {
       if (questao.tipo === 'multipla' && resposta.tipo === 'multipla') {
         pontosObtidos = corrigirMultipla(questao, resposta);
+      } else if (questao.tipo === 'multipla-simples' && resposta.tipo === 'multipla-simples') {
+        pontosObtidos = corrigirMultiplaSimples(questao, resposta);
       } else if (questao.tipo === 'vf' && resposta.tipo === 'vf') {
         pontosObtidos = corrigirVF(questao, resposta);
       } else if (questao.tipo === 'lacuna' && resposta.tipo === 'lacuna') {
         pontosObtidos = corrigirLacuna(questao, resposta);
+      } else if (questao.tipo === 'lacuna' && resposta.tipo === 'lacuna-bloco') {
+        pontosObtidos = corrigirLacunaBloco(questao, resposta);
       }
     }
 

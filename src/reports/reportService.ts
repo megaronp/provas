@@ -3,11 +3,29 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Prova, Resultado, Relatorio, MediaQuestao } from '../models/types';
 
-function getAuth() {
+const DATA_DIR = path.join(process.cwd(), 'data');
+const PROVA_ATIVA_PATH = path.join(DATA_DIR, 'prova_ativa.json');
+
+function getGoogleCredentials(): any {
+  try {
+    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+    if (data.googleCredentials) {
+      return JSON.parse(data.googleCredentials);
+    }
+  } catch {
+    // ignore
+  }
   const keyPath = path.join(process.cwd(), 'credentials', 'google-key.json');
-  if (!fs.existsSync(keyPath)) throw new Error('google-key.json não encontrado');
+  if (fs.existsSync(keyPath)) {
+    return JSON.parse(fs.readFileSync(keyPath, 'utf-8'));
+  }
+  throw new Error('Credenciais do Google não configuradas.');
+}
+
+function getAuth() {
+  const credentials = getGoogleCredentials();
   return new google.auth.GoogleAuth({
-    keyFile: keyPath,
+    credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   });
 }
@@ -29,8 +47,9 @@ export async function buscarResultadosDaSheet(prova: Prova): Promise<Resultado[]
 
   // Detecta colunas dinamicamente
   const camposAluno = prova.camposAluno || [];
-  const nCamposAluno = camposAluno.length > 0 ? camposAluno.length : 3; // fallback: nome, matrícula, data
+  const nCamposAluno = camposAluno.length > 0 ? camposAluno.length : 3;
   const nQuestoes = prova.questoes.length;
+  const nColunasQuestoes = nQuestoes * 2; // Cada questão tem 2 colunas: resp + pts
 
   const resultados: Resultado[] = dataRows.map((row, idx) => {
     const aluno: Record<string, string> = {};
@@ -39,15 +58,19 @@ export async function buscarResultadosDaSheet(prova: Prova): Promise<Resultado[]
       aluno[label] = row[i] || '';
     }
 
-    const resultadosPorQuestao = prova.questoes.map((q, qi) => ({
-      questaoId: q.id,
-      numero: q.numero,
-      pontosObtidos: parseFloat(row[nCamposAluno + qi] || '0'),
-      valorTotal: q.valor,
-    }));
+    const resultadosPorQuestao = prova.questoes.map((q, qi) => {
+      const colResp = nCamposAluno + (qi * 2);
+      const colPts = colResp + 1;
+      return {
+        questaoId: q.id,
+        numero: q.numero,
+        pontosObtidos: parseFloat(row[colPts] || '0'),
+        valorTotal: q.valor,
+      };
+    });
 
-    const notaTotal = parseFloat(row[nCamposAluno + nQuestoes] || '0');
-    const notaMaxima = parseFloat(row[nCamposAluno + nQuestoes + 1] || '0');
+    const notaTotal = parseFloat(row[nCamposAluno + nColunasQuestoes] || '0');
+    const notaMaxima = parseFloat(row[nCamposAluno + nColunasQuestoes + 1] || '0');
 
     return {
       submissaoId: `sheet-row-${idx + 2}`,
@@ -115,7 +138,11 @@ export function gerarCSV(relatorio: Relatorio, prova: Prova): string {
     ? prova.camposAluno.map(c => c.label)
     : ['Nome', 'Matrícula', 'Data'];
 
-  const headerQuestoes = prova.questoes.map(q => `Q${q.numero}(${q.valor}pts)`);
+  const headerQuestoes: string[] = [];
+  for (const q of prova.questoes) {
+    headerQuestoes.push(`Q${q.numero}(resp)`);
+    headerQuestoes.push(`Q${q.numero}(${q.valor}pts)`);
+  }
   const header = [...camposAluno, ...headerQuestoes, 'Nota Final', 'Nota Máxima'];
 
   const linhas = relatorio.resultados.map(r => {
@@ -123,20 +150,23 @@ export function gerarCSV(relatorio: Relatorio, prova: Prova): string {
       const v = r.aluno[c];
       return Array.isArray(v) ? v.join('; ') : (v || '');
     });
-    const questaoVals = prova.questoes.map(q => {
-      const rq = r.resultadosPorQuestao.find(x => x.questaoId === q.id);
-      return rq?.pontosObtidos ?? 0;
-    });
+    const questaoVals: (string | number)[] = [];
+    for (let i = 0; i < prova.questoes.length; i++) {
+      const rq = r.resultadosPorQuestao.find(x => x.questaoId === prova.questoes[i].id);
+      questaoVals.push(rq?.pontosObtidos ?? 0);
+    }
     return [...campoVals, ...questaoVals, r.notaTotal, r.notaMaxima];
   });
 
   // Linha de médias
-  const medias = [
+  const medias: (string | number)[] = [
     ...camposAluno.map((_, i) => i === 0 ? 'MÉDIA' : ''),
-    ...relatorio.mediasPorQuestao.map(m => m.mediaObtida),
-    relatorio.mediaGeral,
-    relatorio.notaMaxima,
   ];
+  for (const m of relatorio.mediasPorQuestao) {
+    medias.push(m.mediaObtida);
+  }
+  medias.push(relatorio.mediaGeral);
+  medias.push(relatorio.notaMaxima);
 
   const toCSVLine = (row: (string | number)[]) =>
     row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');

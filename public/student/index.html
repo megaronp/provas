@@ -56,6 +56,17 @@
     .lac-sel{display:inline-block;min-width:110px;border:2px dashed var(--border);border-radius:7px;padding:3px 9px;font-family:var(--font);font-size:.88rem;background:var(--surface2);cursor:pointer;color:var(--muted);vertical-align:middle;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%238b8a82' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:26px;transition:all .2s}
     .lac-sel:focus{outline:none;border-color:var(--accent);border-style:solid;background-color:var(--acl);color:var(--text)}
     .lac-sel.prec{border-style:solid;border-color:var(--accent);color:var(--text);background-color:var(--acl)}
+    /* Bloco de Palavras */
+    .lac-bloco-wrap{margin-top:8px}
+    .bloco-palavras{display:flex;flex-wrap:wrap;gap:8px;padding:14px;background:var(--surface2);border-radius:10px;margin-bottom:14px}
+    .bloco-palavra{display:inline-block;padding:7px 14px;background:var(--accent);color:#fff;border-radius:20px;font-size:.85rem;cursor:grab;user-select:none;transition:all .2s}
+    .bloco-palavra:hover{background:#1e5bd0;transform:scale(1.05)}
+    .bloco-palavra:active{cursor:grabbing}
+    .lac-drop{display:inline-block;min-width:80px;min-height:32px;border:2px dashed var(--border);border-radius:7px;background:var(--surface2);vertical-align:middle;margin:0 2px}
+    .lac-drop:hover{border-color:var(--accent);background:var(--acl)}
+    .lac-fill{display:inline-block;padding:4px 10px;background:var(--success);color:#fff;border-radius:6px;font-size:.9rem;vertical-align:middle;cursor:pointer;margin:0 2px}
+    .lac-fill:hover{background:#14855a}
+    .lac-x{margin-left:6px;font-size:.8rem;opacity:.8}
     /* Nav bar */
     .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 -4px 18px rgba(0,0,0,.08);z-index:100}
     .btn-nav{padding:9px 22px;border-radius:9px;font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;border:none}
@@ -131,6 +142,8 @@
 const S={tela:'loading',prova:null,provaId:null,listaProvas:null,aluno:null,qi:0,respostas:{},resultado:null};
 
 async function init(){
+  document.addEventListener('dragover',allowDrop);
+  document.addEventListener('drop',dropPalavra);
   try{
     const listRes=await fetch('/api/provas-ativas');
     const provas=await listRes.json();
@@ -246,8 +259,8 @@ function renderQuestao(){
   const total=p.questoes.length;
   const resp=Object.keys(S.respostas).length;
   const pct=Math.round((resp/total)*100);
-  const tiposLbl={multipla:'Múltipla Escolha',vf:'Verdadeiro ou Falso',lacuna:'Preencher Lacunas'};
-  const tiposCls={multipla:'tm',vf:'tv',lacuna:'tl'};
+  const tiposLbl={multipla:'Múltipla Escolha',vf:'Verdadeiro ou Falso',lacuna:'Preencher Lacunas','multipla-simples':'Múltipla Escolha'};
+  const tiposCls={multipla:'tm',vf:'tv',lacuna:'tl','multipla-simples':'tm'};
   const ehUlt=S.qi===total-1;
   const bullets=p.questoes.map((_,i)=>{
     let cls='bullet';
@@ -290,6 +303,7 @@ function renderQuestao(){
 
 function renderRespArea(q){
   if(q.tipo==='multipla')return renderMultipla(q);
+  if(q.tipo==='multipla-simples')return renderMultiplaSimples(q);
   if(q.tipo==='vf')return renderVF(q);
   if(q.tipo==='lacuna')return renderLacuna(q);
   return '';
@@ -310,6 +324,25 @@ function renderMultipla(q){
     }).join('')}`;
 }
 
+function renderMultiplaSimples(q){
+  const sel=S.respostas[q.id]||null;
+  return `
+    <div class="multi-hint"><i class="bi bi-info-circle me-1"></i>Selecione apenas uma resposta. Você ganha <strong>100%</strong> se acertar, <strong>0%</strong> se errar.</div>
+    ${q.opcoes.map((op,i)=>{
+      const isSel=sel===op.id;
+      return `<button class="op-btn ${isSel?'sel':''}" onclick="selMultiplaSimples('${q.id}','${op.id}')">
+        <div class="op-letra">${String.fromCharCode(65+i)}</div>
+        ${op.texto}
+        ${isSel?'<i class="bi bi-check-circle ms-auto" style="color:var(--accent)"></i>':''}
+      </button>`;
+    }).join('')}`;
+}
+
+function selMultiplaSimples(qid,opid){
+  S.respostas[qid]=opid;
+  renderQuestao();
+}
+
 function renderVF(q){
   const resps=S.respostas[q.id]||{};
   return `<table class="vf-table">${q.afirmativas.map(af=>`
@@ -323,6 +356,10 @@ function renderVF(q){
 }
 
 function renderLacuna(q){
+  const subtipo=q.subtipo||'opcoes';
+  if(subtipo==='bloco'){
+    return renderLacunaBloco(q);
+  }
   const resps=S.respostas[q.id]||{};
   let txt=q.textoComLacunas;
   for(const lac of q.lacunas){
@@ -332,6 +369,64 @@ function renderLacuna(q){
     txt=txt.replace(`{{${lac.posicao}}}`,`<select class="${cls}" onchange="selLacuna('${q.id}','${lac.id}',this.value)">${opts}</select>`);
   }
   return `<div class="lac-wrap">${txt}</div>`;
+}
+
+function renderLacunaBloco(q){
+  const resps=S.respostas[q.id]||{respostas:{},palavrasUsadas:[]};
+  const respostas=resps.respostas||{};
+  const palavrasUsadas=resps.palavrasUsadas||[];
+  const bloco=q.blocoPalavras||q.lacunas[0]?.opcoes||[];
+  const disponiveis=bloco.filter(p=>!palavrasUsadas.includes(p));
+  const palavraEls=disponiveis.map(p=>`
+    <span class="bloco-palavra" draggable="true" ondragstart="dragPalavra(event,this)">${p}</span>
+  `).join('');
+  let txt=q.textoComLacunas;
+  for(const lac of q.lacunas){
+    const valor=respostas[lac.id]||'';
+    if(valor){
+      txt=txt.replace(`{{${lac.posicao}}}`,`<span class="lac-fill" onclick="removeLacunaBloco('${q.id}','${lac.id}')">${valor}<span class="lac-x">×</span></span>`);
+    }else{
+      txt=txt.replace(`{{${lac.posicao}}}`,`<span class="lac-drop" data-qid="${q.id}" data-lacid="${lac.id}">Arraste aqui</span>`);
+    }
+  }
+  return `<div class="lac-bloco-wrap"><div class="bloco-palavras">${palavraEls||'<span style="color:var(--muted)">Todas as palavras foram usadas</span>'}</div><div class="lac-wrap">${txt}</div></div>`;
+}
+
+function allowDrop(ev){ev.preventDefault();}
+function dragPalavra(ev,el){ev.dataTransfer.setData('text',el.textContent.replace('×','').trim());}
+function dropPalavra(ev){
+  ev.preventDefault();
+  const target=ev.target;
+  if(!target.classList.contains('lac-drop'))return;
+  const palavra=ev.dataTransfer.getData('text');
+  if(!palavra)return;
+  const qid=target.dataset.qid;
+  const lacid=target.dataset.lacid;
+  selLacunaBloco(qid,lacid,palavra);
+}
+function selLacunaBloco(qid,lacid,palavra){
+  if(!S.respostas[qid])S.respostas[qid]={tipo:'lacuna-bloco',respostas:{},palavrasUsadas:[]};
+  const alreadyUsed=Object.values(S.respostas[qid].respostas).some(p=>p===palavra);
+  if(alreadyUsed){
+    const anterior=Object.entries(S.respostas[qid].respostas).find(([l,p])=>p===palavra&&l!==lacid);
+    if(anterior){
+      const oldLacid=anterior[0];
+      delete S.respostas[oldLacid];
+    }
+  }
+  S.respostas[qid].respostas[lacid]=palavra;
+  if(!S.respostas[qid].palavrasUsadas.includes(palavra)){
+    S.respostas[qid].palavrasUsadas.push(palavra);
+  }
+  renderQuestao();
+}
+function removeLacunaBloco(qid,lacid){
+  const palavra=S.respostas[qid]?.respostas?.[lacid];
+  if(palavra){
+    S.respostas[qid].palavrasUsadas=S.respostas[qid].palavrasUsadas.filter(p=>p!==palavra);
+    delete S.respostas[qid].respostas[lacid];
+  }
+  renderQuestao();
 }
 
 // ── Ações de resposta ────────────────────────────────────────────────────────
@@ -351,12 +446,15 @@ function selVF(qid,afid,val){
 }
 
 function selLacuna(qid,lacid,val){
+  const q=S.prova.questoes.find(x=>x.id===qid);
+  const subtipo=q?.subtipo||'opcoes';
+  if(subtipo==='bloco'){
+    selLacunaBloco(qid,lacid,val);
+    return;
+  }
   if(!S.respostas[qid])S.respostas[qid]={};
   S.respostas[qid][lacid]=val;
-  // Sem re-render completo, só atualiza o select visualmente
-  const q=S.prova.questoes.find(x=>x.id===qid);
   if(q&&q.lacunas.every(l=>S.respostas[qid][l.id])){
-    // todas preenchidas: atualiza bullets
     atualizarBullets();
   }
 }
@@ -419,8 +517,14 @@ function temResposta(q){
   const r=S.respostas[q.id];
   if(r===undefined||r===null)return false;
   if(q.tipo==='multipla')return Array.isArray(r)&&r.length>0;
+  if(q.tipo==='multipla-simples')return r!=null&&r!=='';
   if(q.tipo==='vf')return typeof r==='object'&&Object.keys(r).length>0;
-  if(q.tipo==='lacuna')return typeof r==='object'&&Object.keys(r).length>0;
+  if(q.tipo==='lacuna'){
+    if(r.tipo==='lacuna-bloco'){
+      return r.respostas&&Object.keys(r.respostas).length>0;
+    }
+    return typeof r==='object'&&Object.keys(r).length>0;
+  }
   return false;
 }
 
@@ -435,8 +539,15 @@ async function enviarProva(){
   const respostasArr=p.questoes.map(q=>{
     const r=S.respostas[q.id];
     if(q.tipo==='multipla')return{tipo:'multipla',questaoId:q.id,opcoesSelecionadas:Array.isArray(r)?r:[]};
+    if(q.tipo==='multipla-simples')return{tipo:'multipla-simples',questaoId:q.id,opcaoSelecionada:r||''};
     if(q.tipo==='vf')return{tipo:'vf',questaoId:q.id,respostas:r||{}};
-    if(q.tipo==='lacuna')return{tipo:'lacuna',questaoId:q.id,respostas:r||{}};
+    if(q.tipo==='lacuna'){
+      const lacunaQ=q;
+      if(lacunaQ.subtipo==='bloco'){
+        return{tipo:'lacuna-bloco',questaoId:q.id,respostas:(r?.respostas||{}),palavrasUsadas:(r?.palavrasUsadas||[])};
+      }
+      return{tipo:'lacuna',questaoId:q.id,respostas:r||{}};
+    }
   }).filter(Boolean);
   try{
     const res=await fetch('/api/submeter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provaId:S.provaId,aluno:S.aluno,respostas:respostasArr})});

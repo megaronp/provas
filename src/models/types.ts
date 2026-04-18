@@ -1,6 +1,7 @@
 // ─── Tipos de Questão ────────────────────────────────────────────────────────
 
-export type TipoQuestao = 'multipla' | 'vf' | 'lacuna';
+export type TipoQuestao = 'multipla' | 'multipla-simples' | 'vf' | 'lacuna';
+export type SubtipoLacuna = 'opcoes' | 'bloco';
 
 export interface OpcaoMultipla {
   id: string;
@@ -34,6 +35,11 @@ export interface QuestaoMultipla extends QuestaoBase {
   opcoes: OpcaoMultipla[];
 }
 
+export interface QuestaoMultiplaSimples extends QuestaoBase {
+  tipo: 'multipla-simples';
+  opcoes: OpcaoMultipla[];
+}
+
 export interface QuestaoVF extends QuestaoBase {
   tipo: 'vf';
   afirmativas: AfirmativaVF[];
@@ -41,11 +47,13 @@ export interface QuestaoVF extends QuestaoBase {
 
 export interface QuestaoLacuna extends QuestaoBase {
   tipo: 'lacuna';
+  subtipo: SubtipoLacuna;
   textoComLacunas: string;
   lacunas: Lacuna[];
+  blocoPalavras?: string[];
 }
 
-export type Questao = QuestaoMultipla | QuestaoVF | QuestaoLacuna;
+export type Questao = QuestaoMultipla | QuestaoMultiplaSimples | QuestaoVF | QuestaoLacuna;
 
 // ─── Campos Dinâmicos do Aluno ────────────────────────────────────────────────
 
@@ -86,6 +94,12 @@ export interface RespostaMultipla {
   opcoesSelecionadas: string[];
 }
 
+export interface RespostaMultiplaSimples {
+  tipo: 'multipla-simples';
+  questaoId: string;
+  opcaoSelecionada: string;
+}
+
 export interface RespostaVF {
   tipo: 'vf';
   questaoId: string;
@@ -98,7 +112,14 @@ export interface RespostaLacuna {
   respostas: Record<string, string>;
 }
 
-export type Resposta = RespostaMultipla | RespostaVF | RespostaLacuna;
+export interface RespostaLacunaBloco {
+  tipo: 'lacuna-bloco';
+  questaoId: string;
+  respostas: Record<string, string>;
+  palavrasUsadas: string[];
+}
+
+export type Resposta = RespostaMultipla | RespostaMultiplaSimples | RespostaVF | RespostaLacuna | RespostaLacunaBloco;
 
 export type DadosAluno = Record<string, string | string[]>;
 

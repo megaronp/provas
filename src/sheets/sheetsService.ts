@@ -1,13 +1,31 @@
 import { google } from 'googleapis';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Resultado, Prova } from '../models/types';
+import { Resultado, Prova, Submissao, Questao, QuestaoLacuna, RespostaLacuna, RespostaLacunaBloco } from '../models/types';
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const PROVA_ATIVA_PATH = path.join(DATA_DIR, 'prova_ativa.json');
+
+function getGoogleCredentials(): any {
+  try {
+    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
+    if (data.googleCredentials) {
+      return JSON.parse(data.googleCredentials);
+    }
+  } catch {
+    // ignore
+  }
+  const keyPath = path.join(process.cwd(), 'credentials', 'google-key.json');
+  if (fs.existsSync(keyPath)) {
+    return JSON.parse(fs.readFileSync(keyPath, 'utf-8'));
+  }
+  throw new Error('Credenciais do Google não configuradas.');
+}
 
 function getAuth() {
-  const keyPath = path.join(process.cwd(), 'credentials', 'google-key.json');
-  if (!fs.existsSync(keyPath)) throw new Error('credentials/google-key.json não encontrado.');
+  const credentials = getGoogleCredentials();
   return new google.auth.GoogleAuth({
-    keyFile: keyPath,
+    credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 }
@@ -20,12 +38,13 @@ export async function garantirCabecalho(sheetId: string, prova: Prova): Promise<
     ? prova.camposAluno.map(c => c.label)
     : ['Nome', 'Matrícula', 'Data'];
 
-  const cabecalho = [
-    ...camposAluno,
-    ...prova.questoes.map(q => `Q${q.numero} (${q.valor}pts)`),
-    'Nota Final',
-    'Nota Máxima',
-  ];
+  const cabecalho: string[] = [...camposAluno];
+  for (const q of prova.questoes) {
+    cabecalho.push(`Q${q.numero} (resp)`);
+    cabecalho.push(`Q${q.numero} (${q.valor}pts)`);
+  }
+  cabecalho.push('Nota Final');
+  cabecalho.push('Nota Máxima');
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
@@ -43,10 +62,53 @@ export async function garantirCabecalho(sheetId: string, prova: Prova): Promise<
   });
 }
 
+function formatarRespostaQuestao(questao: Questao, resposta: any): string {
+  if (!resposta) return '';
+  
+  if (questao.tipo === 'lacuna') {
+    const lacunaQ = questao as QuestaoLacuna;
+    if (resposta.tipo === 'lacuna' || resposta.tipo === 'lacuna-bloco') {
+      const respostas = [];
+      for (const lac of lacunaQ.lacunas) {
+        const valor = resposta.respostas?.[lac.id];
+        if (valor) respostas.push(valor);
+      }
+      return respostas.join('; ');
+    }
+    return '';
+  }
+  
+  if (questao.tipo === 'multipla') {
+    const opts = resposta.opcoesSelecionadas || [];
+    const textoOpts = (questao as any).opcoes
+      .filter((o: any) => opts.includes(o.id))
+      .map((o: any) => o.texto)
+      .join('; ');
+    return textoOpts;
+  }
+  
+  if (questao.tipo === 'multipla-simples') {
+    const optId = resposta.opcaoSelecionada;
+    const opt = (questao as any).opcoes.find((o: any) => o.id === optId);
+    return opt?.texto || '';
+  }
+  
+  if (questao.tipo === 'vf') {
+    const resp = resposta.respostas || {};
+    const afirmativas = (questao as any).afirmativas
+      .map((a: any) => `${a.texto.substring(0, 30)}: ${resp[a.id] === true ? 'V' : resp[a.id] === false ? 'F' : '-'}`)
+      .join(' | ');
+    return afirmativas;
+  }
+  
+  return '';
+}
+
 export async function salvarResultadoNaSheet(
   sheetId: string,
   prova: Prova,
-  resultado: Resultado
+  resultado: Resultado,
+  submissao?: Submissao
 ): Promise<void> {
   await garantirCabecalho(sheetId, prova);
 
@@ -62,12 +124,21 @@ export async function salvarResultadoNaSheet(
     return Array.isArray(v) ? v.join(', ') : (v || '');
   });
 
-  const pontosPorQuestao = prova.questoes.map(q => {
+  const linha: (string | number)[] = [...valoresCampos];
+  for (const q of prova.questoes) {
     const r = resultado.resultadosPorQuestao.find(rq => rq.questaoId === q.id);
-    return r ? r.pontosObtidos : 0;
-  });
-
-  const linha = [...valoresCampos, ...pontosPorQuestao, resultado.notaTotal, resultado.notaMaxima];
+    let respostaTexto = '';
+    if (r && submissao) {
+      const respAluno = submissao.respostas.find(resp => resp.questaoId === q.id);
+      if (respAluno) {
+        respostaTexto = formatarRespostaQuestao(q, respAluno);
+      }
+    }
+    linha.push(respostaTexto);
+    linha.push(r ? r.pontosObtidos : 0);
+  }
+  linha.push(resultado.notaTotal);
+  linha.push(resultado.notaMaxima);
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,

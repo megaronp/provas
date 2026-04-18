@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { Prova, Submissao } from '../models/types';
+import { Prova, Submissao, QuestaoLacuna } from '../models/types';
 import { corrigirSubmissao } from '../correction/corrector';
 import { salvarResultadoNaSheet } from '../sheets/sheetsService';
 
@@ -79,7 +79,11 @@ router.get('/api/prova', (req: Request, res: Response) => {
         return { ...q, afirmativas: q.afirmativas.map(({ id, texto }) => ({ id, texto })) };
       }
       if (q.tipo === 'lacuna') {
-        return { ...q, lacunas: q.lacunas.map(({ id, posicao, opcoes }) => ({ id, posicao, opcoes })) };
+        const lacuna = q as QuestaoLacuna;
+        if (lacuna.subtipo === 'bloco') {
+          return { ...q, lacunas: lacuna.lacunas.map(({ id, posicao, correta }) => ({ id, posicao, correta })), blocoPalavras: lacuna.blocoPalavras };
+        }
+        return { ...q, lacunas: lacuna.lacunas.map(({ id, posicao, opcoes }) => ({ id, posicao, opcoes })) };
       }
       return q;
     }),
@@ -113,7 +117,7 @@ router.post('/api/submeter', async (req: Request, res: Response) => {
   const resultado = corrigirSubmissao(prova, submissao);
 
   try {
-    await salvarResultadoNaSheet(prova.googleSheetId, prova, resultado);
+    await salvarResultadoNaSheet(prova.googleSheetId, prova, resultado, submissao);
   } catch (err: any) {
     console.error('Erro ao salvar no Google Sheets:', err.message);
   }
