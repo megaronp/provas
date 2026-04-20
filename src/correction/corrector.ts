@@ -5,21 +5,23 @@ import {
 } from '../models/types';
 
 /**
- * Múltipla escolha — sistema de pontos por acerto e por evitar erros:
+ * Múltipla escolha — sistema sem penalização:
  *
- * Cada opção vale 1 "unidade":
- *   +1 unidade para cada opção CORRETA que o aluno MARCOU
- *   +1 unidade para cada opção ERRADA que o aluno NÃO MARCOU
+ * Cada opção vale: valor_da_questão / número_de_opções
  *
- * Total de unidades possíveis = nº de corretas + nº de erradas = total de opções
- * Pontuação = (unidades_obtidas / total_unidades) * valor_da_questão
+ * Pontuação por opção:
+ *   +1 ponto para cada opção CORRETA MARCADA
+ *   +1 ponto para cada opção ERRADA NÃO MARCADA
+ *   0 ponto para opção ERRADA MARCADA ou CORRETA NÃO MARCADA
  *
- * Exemplo: 5 opções (2 certas, 3 erradas), questão = 5 pts
- *   Marcou 1 certa, 0 erradas  → 1 + 3 = 4 unidades → 4 pts
- *   Marcou 2 certas, 0 erradas → 2 + 3 = 5 unidades → 5 pts (100%)
- *   Marcou 1 certa, 1 errada   → 1 + 2 = 3 unidades → 3 pts
- *   Marcou 0, 0                → 0 + 3 = 3 unidades → 3 pts
- *   Marcou tudo (2c + 3e)      → 2 + 0 = 2 unidades → 2 pts
+ * Nota: pts_mínimo = 0
+ *
+ * Exemplo: 4 opções (A,B,C,D), B,C corretas, valor=4, cada opção=1pt
+ *   Marcou só B:  +1(B) +2(A,D não marcadas) = 3pt
+ *   Marcou A,B:   +1(B) +1(D não marcada) = 2pt
+ *   Marcou A,B,C: +2(B,C) +1(D não marcada) = 3pt
+ *   Marcou todas: +2(B,C) +0 = 2pt
+ *   Não marcou:   +0 +2(A,D não marcadas) = 2pt
  */
 function corrigirMultipla(questao: QuestaoMultipla, resposta: RespostaMultipla): number {
   const corretas = questao.opcoes.filter(o => o.correta).map(o => o.id);
@@ -29,12 +31,15 @@ function corrigirMultipla(questao: QuestaoMultipla, resposta: RespostaMultipla):
   const totalOpcoes = questao.opcoes.length;
   if (totalOpcoes === 0) return 0;
 
-  // Unidades ganhas
-  const corretasMarcadas  = selecionadas.filter(s => corretas.includes(s)).length;
-  const erradasNaoMarcadas = erradas.filter(e => !selecionadas.includes(e)).length;
-  const unidadesObtidas = corretasMarcadas + erradasNaoMarcadas;
+  const valorPorOpcao = questao.valor / totalOpcoes;
 
-  return parseFloat(((unidadesObtidas / totalOpcoes) * questao.valor).toFixed(2));
+  const corretasMarcadas    = corretas.filter(c => selecionadas.includes(c)).length;
+  const erradasNaoMarcadas = erradas.filter(e => !selecionadas.includes(e)).length;
+
+  const pontos = (corretasMarcadas * valorPorOpcao)
+               + (erradasNaoMarcadas * valorPorOpcao);
+
+  return parseFloat(Math.max(0, pontos).toFixed(2));
 }
 
 function corrigirMultiplaSimples(questao: QuestaoMultiplaSimples, resposta: RespostaMultiplaSimples): number {
@@ -44,9 +49,11 @@ function corrigirMultiplaSimples(questao: QuestaoMultiplaSimples, resposta: Resp
 }
 
 /**
- * Verdadeiro/Falso proporcional com desconto:
+ * Verdadeiro/Falso - ponto por acerto:
  * - Cada afirmativa vale valor/total pontos
- * - Acerto: +ponto, Erro: -ponto (mínimo 0)
+ * - +1 ponto para cada afirmativa respondida CORRETAMENTE
+ * - 0 ponto para cada afirmativa respondida ERRADAMENTE
+ * - Mínimo: 0
  */
 function corrigirVF(questao: QuestaoVF, resposta: RespostaVF): number {
   const total = questao.afirmativas.length;
@@ -56,11 +63,10 @@ function corrigirVF(questao: QuestaoVF, resposta: RespostaVF): number {
 
   for (const af of questao.afirmativas) {
     const respostaAluno = resposta.respostas[af.id];
-    if (respostaAluno === undefined) continue; // não respondida: não ganha nem perde
+    if (respostaAluno === undefined) continue;
+    
     if (respostaAluno === af.correta) {
       pontos += valorPorItem;
-    } else {
-      pontos -= valorPorItem;
     }
   }
 
@@ -100,7 +106,9 @@ export function corrigirSubmissao(prova: Prova, submissao: Submissao): Resultado
     const resposta = submissao.respostas.find(r => r.questaoId === questao.id);
     let pontosObtidos = 0;
 
-    if (resposta) {
+    if (resposta && resposta.tipo === 'nao-respondida') {
+      pontosObtidos = 0;
+    } else if (resposta) {
       if (questao.tipo === 'multipla' && resposta.tipo === 'multipla') {
         pontosObtidos = corrigirMultipla(questao, resposta);
       } else if (questao.tipo === 'multipla-simples' && resposta.tipo === 'multipla-simples') {

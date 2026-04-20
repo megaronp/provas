@@ -119,7 +119,12 @@ export interface RespostaLacunaBloco {
   palavrasUsadas: string[];
 }
 
-export type Resposta = RespostaMultipla | RespostaMultiplaSimples | RespostaVF | RespostaLacuna | RespostaLacunaBloco;
+export interface RespostaNaoRespondida {
+  tipo: 'nao-respondida';
+  questaoId: string;
+}
+
+export type Resposta = RespostaMultipla | RespostaMultiplaSimples | RespostaVF | RespostaLacuna | RespostaLacunaBloco | RespostaNaoRespondida;
 
 export type DadosAluno = Record<string, string | string[]>;
 
@@ -128,6 +133,8 @@ export interface Submissao {
   provaId: string;
   aluno: DadosAluno;
   respostas: Resposta[];
+  notaTotal?: number;
+  notaMaxima?: number;
   dataEnvio: string;
 }
 

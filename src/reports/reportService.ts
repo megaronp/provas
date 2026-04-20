@@ -1,95 +1,67 @@
-import { google } from 'googleapis';
-import * as fs from 'fs';
-import * as path from 'path';
-import { Prova, Resultado, Relatorio, MediaQuestao } from '../models/types';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const PROVA_ATIVA_PATH = path.join(DATA_DIR, 'prova_ativa.json');
-
-function getGoogleCredentials(): any {
-  try {
-    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
-    if (data.googleCredentials) {
-      return JSON.parse(data.googleCredentials);
-    }
-  } catch {
-    // ignore
-  }
-  const keyPath = path.join(process.cwd(), 'credentials', 'google-key.json');
-  if (fs.existsSync(keyPath)) {
-    return JSON.parse(fs.readFileSync(keyPath, 'utf-8'));
-  }
-  throw new Error('Credenciais do Google não configuradas.');
-}
-
-function getAuth() {
-  const credentials = getGoogleCredentials();
-  return new google.auth.GoogleAuth({
-    credentials,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-  });
-}
+import { supabase } from '../db/supabaseClient';
+import { Prova, Resultado, Relatorio, MediaQuestao, Submissao, Resposta } from '../models/types';
+import { corrigirSubmissao } from '../correction/corrector';
+import { getCached } from '../utils/cache';
 
 export async function buscarResultadosDaSheet(prova: Prova): Promise<Resultado[]> {
-  const auth = getAuth();
-  const sheets = google.sheets({ version: 'v4', auth });
+  return getCached(`resultados:${prova.id}`, async () => {
+    const { data, error } = await supabase
+      .from('submissoes')
+      .select(`
+        id,
+        prova_id,
+        aluno_dados,
+        nota_total,
+        nota_maxima,
+        created_at,
+        respostas (
+          questao_id,
+          tipo,
+          dados
+        )
+      `)
+      .eq('prova_id', prova.id)
+      .order('created_at', { ascending: true });
 
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: prova.googleSheetId,
-    range: 'A1:ZZ',
-  });
-
-  const rows = res.data.values || [];
-  if (rows.length < 2) return [];
-
-  const header = rows[0];
-  const dataRows = rows.slice(1);
-
-  // Detecta colunas dinamicamente
-  const camposAluno = prova.camposAluno || [];
-  const nCamposAluno = camposAluno.length > 0 ? camposAluno.length : 3;
-  const nQuestoes = prova.questoes.length;
-  const nColunasQuestoes = nQuestoes * 2; // Cada questão tem 2 colunas: resp + pts
-
-  const resultados: Resultado[] = dataRows.map((row, idx) => {
-    const aluno: Record<string, string> = {};
-    for (let i = 0; i < nCamposAluno; i++) {
-      const label = header[i] || `campo${i}`;
-      aluno[label] = row[i] || '';
+    if (error) {
+      console.error('Erro ao buscar resultados:', error);
+      return [];
     }
 
-    const resultadosPorQuestao = prova.questoes.map((q, qi) => {
-      const colResp = nCamposAluno + (qi * 2);
-      const colPts = colResp + 1;
+    if (!data || data.length === 0) return [];
+
+    return data.map((s: any) => {
+      const submissao: Submissao = {
+        id: s.id,
+        provaId: s.prova_id,
+        aluno: s.aluno_dados,
+        respostas: (s.respostas || []).map((r: any) => r.dados as Resposta),
+        dataEnvio: s.created_at,
+      };
+
+      const resultadoCalculado = corrigirSubmissao(prova, submissao);
+
       return {
-        questaoId: q.id,
-        numero: q.numero,
-        pontosObtidos: parseFloat(row[colPts] || '0'),
-        valorTotal: q.valor,
+        submissaoId: s.id,
+        provaId: s.prova_id,
+        provaTitle: prova.titulo,
+        aluno: s.aluno_dados,
+        resultadosPorQuestao: resultadoCalculado.resultadosPorQuestao,
+        notaTotal: resultadoCalculado.notaTotal,
+        notaMaxima: resultadoCalculado.notaMaxima,
+        dataEnvio: s.created_at,
       };
     });
-
-    const notaTotal = parseFloat(row[nCamposAluno + nColunasQuestoes] || '0');
-    const notaMaxima = parseFloat(row[nCamposAluno + nColunasQuestoes + 1] || '0');
-
-    return {
-      submissaoId: `sheet-row-${idx + 2}`,
-      provaId: prova.id,
-      provaTitle: prova.titulo,
-      aluno,
-      resultadosPorQuestao,
-      notaTotal,
-      notaMaxima,
-      dataEnvio: '',
-    };
-  });
-
-  return resultados.filter(r => r.notaMaxima > 0);
+  }, { ttl: 60 });
 }
 
-export function calcularRelatorio(prova: Prova, resultados: Resultado[]): Relatorio {
-  const total = resultados.length;
-  if (total === 0) {
+export async function calcularRelatorio(prova: Prova): Promise<Relatorio> {
+  const { data: submissoes, error: submissoesError } = await supabase
+    .from('submissoes')
+    .select('id, nota_total, nota_maxima, created_at, respostas (questao_id, nota)')
+    .eq('prova_id', prova.id);
+
+  if (submissoesError || !submissoes || submissoes.length === 0) {
     return {
       provaId: prova.id,
       provaTitle: prova.titulo,
@@ -97,39 +69,48 @@ export function calcularRelatorio(prova: Prova, resultados: Resultado[]): Relato
       mediaGeral: 0,
       notaMaxima: prova.questoes.reduce((a, q) => a + q.valor, 0),
       mediasPorQuestao: [],
-      resultados: [],
+      resultados: []
     };
   }
 
-  const mediaGeral = parseFloat(
-    (resultados.reduce((a, r) => a + r.notaTotal, 0) / total).toFixed(2)
-  );
+  const totalAlunos = submissoes.length;
+  const notas = submissoes.map(s => s.nota_total || 0);
+  const mediaGeral = notas.reduce((a, b) => a + b, 0) / totalAlunos;
   const notaMaxima = prova.questoes.reduce((a, q) => a + q.valor, 0);
 
-  const mediasPorQuestao: MediaQuestao[] = prova.questoes.map(q => {
-    const soma = resultados.reduce((a, r) => {
-      const rq = r.resultadosPorQuestao.find(x => x.questaoId === q.id);
-      return a + (rq?.pontosObtidos || 0);
-    }, 0);
-    const media = parseFloat((soma / total).toFixed(2));
-    return {
+  const questoesMap = new Map(prova.questoes.map(q => [q.id, q]));
+  const mediasPorQuestao: MediaQuestao[] = [];
+  for (const q of prova.questoes) {
+    let totalNota = 0;
+    let count = 0;
+    for (const s of submissoes) {
+      const respostas = s.respostas || [];
+      const r = respostas.find((r: any) => r.questao_id === q.id);
+      if (r?.nota !== undefined && r.nota !== null) {
+        totalNota += Number(r.nota);
+        count++;
+      }
+    }
+    const mediaObtida = count > 0 ? totalNota / count : 0;
+    const percentual = q.valor > 0 ? (mediaObtida / q.valor) * 100 : 0;
+    mediasPorQuestao.push({
       questaoId: q.id,
       numero: q.numero,
       enunciado: q.enunciado,
       valorTotal: q.valor,
-      mediaObtida: media,
-      percentual: parseFloat(((media / q.valor) * 100).toFixed(1)),
-    };
-  });
+      mediaObtida: Number(mediaObtida.toFixed(2)),
+      percentual: Number(percentual.toFixed(1))
+    });
+  }
 
   return {
     provaId: prova.id,
     provaTitle: prova.titulo,
-    totalAlunos: total,
-    mediaGeral,
+    totalAlunos,
+    mediaGeral: Number(mediaGeral.toFixed(2)),
     notaMaxima,
     mediasPorQuestao,
-    resultados,
+    resultados: []
   };
 }
 
@@ -141,9 +122,10 @@ export function gerarCSV(relatorio: Relatorio, prova: Prova): string {
   const headerQuestoes: string[] = [];
   for (const q of prova.questoes) {
     headerQuestoes.push(`Q${q.numero}(resp)`);
-    headerQuestoes.push(`Q${q.numero}(${q.valor}pts)`);
+    headerQuestoes.push(`Q${q.numero}(total)`);
+    headerQuestoes.push(`Q${q.numero}%`);
   }
-  const header = [...camposAluno, ...headerQuestoes, 'Nota Final', 'Nota Máxima'];
+  const header = [...camposAluno, ...headerQuestoes, 'Total aluno', 'Total prova', 'Media %'];
 
   const linhas = relatorio.resultados.map(r => {
     const campoVals = camposAluno.map(c => {
@@ -153,20 +135,30 @@ export function gerarCSV(relatorio: Relatorio, prova: Prova): string {
     const questaoVals: (string | number)[] = [];
     for (let i = 0; i < prova.questoes.length; i++) {
       const rq = r.resultadosPorQuestao.find(x => x.questaoId === prova.questoes[i].id);
-      questaoVals.push(rq?.pontosObtidos ?? 0);
+      const pontos = rq?.pontosObtidos ?? 0;
+      const total = rq?.valorTotal ?? 0;
+      const pct = total > 0 ? ((pontos / total) * 100).toFixed(2) : '0.00';
+      questaoVals.push(pontos);
+      questaoVals.push(total);
+      questaoVals.push(pct + '%');
     }
-    return [...campoVals, ...questaoVals, r.notaTotal, r.notaMaxima];
+    const mediaPct = r.notaMaxima > 0 ? ((r.notaTotal / r.notaMaxima) * 100).toFixed(2) : '0.00';
+    return [...campoVals, ...questaoVals, r.notaTotal, r.notaMaxima, mediaPct + '%'];
   });
 
-  // Linha de médias
   const medias: (string | number)[] = [
     ...camposAluno.map((_, i) => i === 0 ? 'MÉDIA' : ''),
   ];
   for (const m of relatorio.mediasPorQuestao) {
+    const pct = m.valorTotal > 0 ? ((m.mediaObtida / m.valorTotal) * 100).toFixed(2) : '0.00';
     medias.push(m.mediaObtida);
+    medias.push(m.valorTotal);
+    medias.push(pct + '%');
   }
+  const mediaGeralPct = relatorio.notaMaxima > 0 ? ((relatorio.mediaGeral / relatorio.notaMaxima) * 100).toFixed(2) : '0.00';
   medias.push(relatorio.mediaGeral);
   medias.push(relatorio.notaMaxima);
+  medias.push(mediaGeralPct + '%');
 
   const toCSVLine = (row: (string | number)[]) =>
     row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');

@@ -32,26 +32,32 @@
     .stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:.83rem}
     .stat-row:last-child{border-bottom:none}
     .stat-val{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:.8rem}
-    /* Buttons */
-    .btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:var(--font);font-weight:600;font-size:.83rem;cursor:pointer;transition:opacity .2s,transform .1s;width:100%}
-    .btn-p:hover{opacity:.88;transform:translateY(-1px)}
-    .btn-o{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:all .2s;width:100%}
-    .btn-o:hover{border-color:var(--accent);background:rgba(79,142,247,.08)}
-    .btn-s{background:rgba(34,211,165,.12);color:var(--success);border:1px solid rgba(34,211,165,.3);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;width:100%}
-    .btn-s:hover{background:rgba(34,211,165,.22)}
-    .btn-d{background:rgba(247,80,80,.12);color:var(--danger);border:1px solid rgba(247,80,80,.3);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;width:100%}
-    .btn-d:hover{background:rgba(247,80,80,.22)}
-    .btn-ic{background:transparent;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0}
-    .btn-ic:hover{border-color:var(--accent);color:var(--accent)}
-    .btn-ic.del:hover{border-color:var(--danger);color:var(--danger)}
-    /* Forms */
-    .fg{margin-bottom:14px}
-    label{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:5px;text-transform:uppercase}
-    input,select,textarea{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-family:var(--font);font-size:.88rem;width:100%;transition:border-color .2s;outline:none}
-    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
-    input::placeholder,textarea::placeholder{color:var(--muted)}
-    select option{background:var(--surface2)}
-    textarea{resize:vertical;min-height:76px}
+     /* Buttons */
+     .btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:var(--font);font-weight:600;font-size:.83rem;cursor:pointer;transition:opacity .2s,transform .1s;width:100%;position:relative}
+     .btn-p:hover{opacity:.88;transform:translateY(-1px)}
+     .btn-o{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:all .2s;width:100%;position:relative}
+     .btn-o:hover{border-color:var(--accent);background:rgba(79,142,247,.08)}
+     .btn-s{background:rgba(34,211,165,.12);color:var(--success);border:1px solid rgba(34,211,165,.3);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;width:100%;position:relative}
+     .btn-s:hover{background:rgba(34,211,165,.22)}
+     .btn-d{background:rgba(247,80,80,.12);color:var(--danger);border:1px solid rgba(247,80,80,.3);border-radius:8px;padding:9px 18px;font-family:var(--font);font-size:.83rem;cursor:pointer;transition:background .2s;width:100%;position:relative}
+     .btn-d:hover{background:rgba(247,80,80,.22)}
+     .btn-ic{background:transparent;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0;position:relative}
+     .btn-ic:hover{border-color:var(--accent);color:var(--accent)}
+     .btn-ic.del:hover{border-color:var(--danger);color:var(--danger)}
+      /* Loading */
+      .loading{position:relative;pointer-events:none;opacity:.6}
+      .loading::after{content:'⟳';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;animation:spin 1s linear infinite}
+      @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      #global-loading{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;backdrop-filter:blur(3px)}
+      #global-loading.show{display:flex}
+      #global-loading::after{content:'⟳';font-size:3rem;animation:spin 1s linear infinite;margin-bottom:16px}
+      #global-loading .msg{font-family:var(--font);font-size:.95rem;font-weight:500;max-width:280px;text-align:center;line-height:1.5}
+     /* Forms */
+     input,select,textarea{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-family:var(--font);font-size:.88rem;width:100%;transition:border-color .2s;outline:none}
+     input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+     input::placeholder,textarea::placeholder{color:var(--muted)}
+     select option{background:var(--surface2)}
+     textarea{resize:vertical;min-height:76px}
     /* Modal */
     .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s}
     .modal-ov.open{opacity:1;pointer-events:all}
@@ -63,8 +69,10 @@
     .modal-x:hover{color:var(--text)}
     /* Questão lista */
     .q-list{display:flex;flex-direction:column;gap:10px}
-    .q-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;align-items:flex-start;gap:11px;transition:border-color .2s}
+    .q-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;align-items:flex-start;gap:11px;transition:border-color .2s;cursor:grab}
     .q-item:hover{border-color:var(--accent)}
+    .q-item:active{cursor:grabbing}
+    .q-drag{color:var(--muted);font-size:16px;cursor:grab;display:flex;align-items:center}
     .q-num{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;flex-shrink:0;font-family:var(--mono)}
     .q-info{flex:1;min-width:0}
     .q-env{font-size:.83rem;line-height:1.5;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -107,23 +115,38 @@
     .empty .ic{font-size:44px;margin-bottom:10px;opacity:.4}
     ::-webkit-scrollbar{width:5px}
     ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-    .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
-    .inline-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  </style>
+     .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+     .inline-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+     /* Loading */
+     .loading{position:relative;pointer-events:none;opacity:.7}
+     .loading::after{content:'';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:inherit;border-radius:inherit;font-size:1.2rem}
+     .loading span{visibility:hidden}
+     .btn-p.loading::after{content:'⟳';animation:spin 1s linear infinite}
+     .btn-o.loading::after{content:'⟳';animation:spin 1s linear infinite}
+     .btn-s.loading::after{content:'⟳';animation:spin 1s linear infinite}
+     .btn-d.loading::after{content:'⟳';animation:spin 1s linear infinite}
+      .btn-ic.loading::after{content:'⟳';animation:spin 1s linear infinite}
+      @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      #global-loading{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;backdrop-filter:blur(3px)}
+      #global-loading.show{display:flex}
+      #global-loading::after{content:'⟳';font-size:3rem;animation:spin 1s linear infinite;margin-bottom:16px}
+      #global-loading .msg{font-family:var(--font);font-size:.95rem;font-weight:500;max-width:280px;text-align:center;line-height:1.5}
+    </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-icon">📋</div>
-    <span>ProvaSystem</span>
-  </div>
-  <div class="nav-tabs-top">
-    <a class="nav-tab" href="/admin"><i class="bi bi-pencil-square"></i> Editor</a>
-    <a class="nav-tab" href="/admin/relatorio"><i class="bi bi-bar-chart-line"></i> Relatórios</a>
-    <a class="nav-tab" href="/admin/config"><i class="bi bi-gear"></i> Configurações</a>
-    <a class="nav-tab" href="/" target="_blank"><i class="bi bi-person-check"></i> Área do Aluno</a>
-  </div>
-</div>
+ <div class="topbar">
+   <div class="brand">
+     <div class="brand-icon">📋</div>
+     <span>ProvaSystem</span>
+   </div>
+   <div class="nav-tabs-top">
+     <a class="nav-tab" href="/admin"><i class="bi bi-pencil-square"></i> Editor</a>
+     <a class="nav-tab" href="/admin/relatorio"><i class="bi bi-bar-chart-line"></i> Relatórios</a>
+     <a class="nav-tab" href="/admin/config"><i class="bi bi-gear"></i> Configurações</a>
+     <a class="nav-tab" href="/" target="_blank"><i class="bi bi-person-check"></i> Área do Aluno</a>
+     <button class="btn-ic" onclick="location.reload()" title="Recarregar"><i class="bi bi-arrow-clockwise"></i></button>
+   </div>
+ </div>
 
 <div class="layout">
   <aside class="sidebar">
@@ -156,6 +179,9 @@
       <button class="btn-p" style="width:auto;padding:9px 20px" id="btn-add-q" onclick="abrirModalQuestao(null)" disabled>
         <i class="bi bi-plus-lg me-1"></i>Adicionar Questão
       </button>
+      <button class="btn-o" style="width:auto;padding:9px 16px" onclick="location.reload()" title="Recarregar">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
     </div>
     <div id="q-container">
       <div class="empty"><div class="ic">🗂️</div><p>Crie ou abra uma prova para começar</p></div>
@@ -169,12 +195,7 @@
     <div class="modal-hd"><span class="modal-title">Configurar Prova</span><button class="modal-x" onclick="fecharModal('m-prova')">×</button></div>
     <div class="fg"><label>Título</label><input id="p-titulo" type="text" placeholder="Ex: Avaliação Bimestral"/></div>
     <div class="fg"><label>Disciplina</label><input id="p-disciplina" type="text" placeholder="Ex: Matemática"/></div>
-    <div class="fg">
-      <label>ID da Planilha Google Sheets</label>
-      <input id="p-sheet" type="text" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgm..."/>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:5px">O ID fica na URL da planilha entre <code>/d/</code> e <code>/edit</code></div>
-    </div>
-    <div style="display:flex;gap:9px;margin-top:6px">
+    <div style="display:flex;gap:9px;margin-top:16px">
       <button class="btn-o" onclick="fecharModal('m-prova')">Cancelar</button>
       <button class="btn-p" onclick="salvarProva()">Salvar</button>
     </div>
@@ -224,10 +245,13 @@
       <button class="btn-o" onclick="fecharModal('m-questao')">Cancelar</button>
       <button class="btn-p" id="btn-salvar-q" onclick="salvarQuestao()">Adicionar</button>
     </div>
-  </div>
-</div>
+   </div>
+ </div>
 
-<div class="toast-c" id="tc"></div>
+ <!-- Loading global -->
+ <div id="global-loading"></div>
+
+ <div class="toast-c" id="tc"></div>
 
 <script>
 let prova = null;
@@ -235,16 +259,55 @@ let editandoQuestaoId = null;
 let camposEditando = [];
 let criandoNovaProva = false;
 
+// ── Loading helpers ────────────────────────────────────────────────────────────
+ function setLoading(btn, loading) {
+   if (!btn) return;
+   if (loading) btn.classList.add('loading');
+   else btn.classList.remove('loading');
+ }
+
+ function showGlobalLoading(msg='Carregando...') {
+   const el=document.getElementById('global-loading');
+   el.innerHTML=`<div class="msg">${msg}</div>`;
+   el.classList.add('show');
+ }
+
+ function hideGlobalLoading() {
+   document.getElementById('global-loading').classList.remove('show');
+ }
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
-  const r = await fetch('/admin/prova');
-  prova = await r.json();
-  renderSidebar();
-  renderQuestoes();
+  console.log('Init: carregando prova...');
+  showGlobalLoading();
+  try {
+    const r = await fetch('/admin/prova');
+    if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+    prova = await r.json();
+    console.log('Init: prova carregada:', prova);
+    console.log('Init: questoes na prova:', prova?.questoes?.length);
+    renderSidebar();
+    renderQuestoes();
+  } catch (e) {
+    console.error('Erro ao carregar prova:', e);
+    toast('Erro ao carregar prova: ' + e.message, 'err');
+    prova = null;
+    renderSidebar();
+    renderQuestoes();
+  } finally {
+    hideGlobalLoading();
+  }
+}
+
+// Debug functions
+function debugProva() {
+  console.log('Estado atual da prova:', prova);
+  console.log('Questoes:', prova?.questoes?.length || 0);
 }
 
 // ── Sidebar ──────────────────────────────────────────────────────────────────
 function renderSidebar() {
+  console.log('renderSidebar: prova =', prova);
   const card = document.getElementById('prova-card');
   const btnAtivar = document.getElementById('btn-ativar');
   const btnDel = document.getElementById('btn-del-prova');
@@ -252,23 +315,24 @@ function renderSidebar() {
   const btnCampos = document.getElementById('btn-campos');
 
   if (!prova) {
+    console.log('Sem prova, renderizando empty');
     card.innerHTML = `<div class="empty" style="padding:16px"><div class="ic">📄</div><p style="font-size:.8rem">Nenhuma prova</p></div>`;
     btnAtivar.style.display='none'; btnDel.style.display='none';
     btnAdd.disabled=true; btnCampos.disabled=true;
     document.getElementById('campos-preview').textContent='—';
     return;
   }
-  const total = prova.questoes.reduce((a,q)=>a+q.valor,0);
-  card.innerHTML=`
-    <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
-      <div class="status-dot ${prova.ativa?'dot-on':'dot-off'}"></div>
-      <span style="font-size:.72rem;color:var(--muted)">${prova.ativa?'ATIVA':'INATIVA'}</span>
-    </div>
-    <div style="font-size:1rem;font-weight:700;margin-bottom:2px">${prova.titulo}</div>
-    <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px">${prova.disciplina}</div>
-    <div class="stat-row"><span>Questões</span><span class="stat-val">${prova.questoes.length}</span></div>
-    <div class="stat-row"><span>Total pts</span><span class="stat-val">${total.toFixed(1)}</span></div>
-    <div class="stat-row"><span>Sheet ID</span><span class="stat-val" style="font-size:.68rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prova.googleSheetId.slice(0,14)}…</span></div>`;
+  console.log('Renderizando sidebar para prova:', prova.titulo, 'questoes:', prova.questoes?.length);
+   const total = prova.questoes.reduce((a,q)=>a+q.valor,0);
+   card.innerHTML=`
+     <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
+       <div class="status-dot ${prova.ativa?'dot-on':'dot-off'}"></div>
+       <span style="font-size:.72rem;color:var(--muted)">${prova.ativa?'ATIVA':'INATIVA'}</span>
+     </div>
+     <div style="font-size:1rem;font-weight:700;margin-bottom:2px">${prova.titulo}</div>
+     <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px">${prova.disciplina}</div>
+     <div class="stat-row"><span>Questões</span><span class="stat-val">${prova.questoes.length}</span></div>
+     <div class="stat-row"><span>Total pts</span><span class="stat-val">${total.toFixed(1)}</span></div>`;
   btnAtivar.style.display='block';
   btnAtivar.innerHTML=prova.ativa?'<i class="bi bi-stop-fill me-1"></i>Desativar':'<i class="bi bi-play-fill me-1"></i>Ativar Prova';
   btnAtivar.className=prova.ativa?'btn-d':'btn-s';
@@ -283,109 +347,237 @@ function renderSidebar() {
 
 function renderQuestoes() {
   const c = document.getElementById('q-container');
-  if (!prova||prova.questoes.length===0) {
-    c.innerHTML=`<div class="empty"><div class="ic">🗂️</div><p>${prova?'Nenhuma questão ainda':'Crie ou abra uma prova'}</p></div>`;
+  if (!prova) {
+    c.innerHTML = `<div class="empty"><div class="ic">🗂️</div><p>Crie ou abra uma prova</p></div>`;
     return;
   }
-  c.innerHTML=`<div class="q-list">${prova.questoes.map(q=>{
-    const tipos={multipla:['bm','Múltipla Escolha'],vf:['bv','V/F'],lacuna:['bl','Lacunas']};
-    const [cls,lbl]=tipos[q.tipo];
-    const env=q.enunciado.length>90?q.enunciado.slice(0,90)+'…':q.enunciado;
-    return `<div class="q-item">
-      <div class="q-num">${q.numero}</div>
-      <div class="q-info">
-        <div class="q-env">${env}</div>
-        <div class="q-meta"><span class="badge ${cls}">${lbl}</span><span class="badge bp">${q.valor} pts</span></div>
-      </div>
-      <div class="q-actions">
-        <button class="btn-ic" onclick="abrirModalQuestao('${q.id}')" title="Editar"><i class="bi bi-pencil"></i></button>
-        <button class="btn-ic del" onclick="deletarQuestao('${q.id}')" title="Remover"><i class="bi bi-trash"></i></button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
+  
+  const questoes = prova.questoes || [];
+  console.log('Renderizando questões:', questoes.length, questoes);
+  if (questoes.length === 0) {
+    c.innerHTML = `<div class="empty"><div class="ic">🗂️</div><p>Nenhuma questão ainda</p></div>`;
+    return;
+  }
+
+  try {
+    c.innerHTML = `<div class="q-list">${questoes.map((q, idx) => {
+      if (!q) return '';
+      const tipos = { multipla: ['bm','Múltipla Escolha'], vf: ['bv','V/F'], lacuna: ['bl','Lacunas'] };
+      const [cls, lbl] = tipos[q.tipo] || ['',''];
+      const env = q.enunciado ? (q.enunciado.length > 90 ? q.enunciado.slice(0,90)+'…' : q.enunciado) : '';
+      return `<div class="q-item" draggable="true" data-idx="${idx}" ondragstart="dragQuestaoStart(event)" ondragover="dragQuestaoOver(event)" ondrop="dragQuestaoDrop(event)">
+        <div class="q-drag"><i class="bi bi-grip-vertical"></i></div>
+        <div class="q-num">${q.numero || ''}</div>
+        <div class="q-info">
+          <div class="q-env">${env}</div>
+          <div class="q-meta"><span class="badge ${cls}">${lbl}</span><span class="badge bp">${q.valor || 0} pts</span></div>
+        </div>
+        <div class="q-actions">
+          <button class="btn-ic" onclick="abrirModalQuestao('${q.id}')" title="Editar"><i class="bi bi-pencil"></i></button>
+           <button class="btn-ic del" onclick="deletarQuestao('${q.id}', this)" title="Remover"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  } catch (e) {
+    console.error('Erro ao renderizar questões:', e, questoes);
+    c.innerHTML = `<div class="empty"><div class="ic">❌</div><p>Erro ao carregar questões</p></div>`;
+  }
+}
+
+// Drag & drop para reordenar questões
+let dragQuestaoIdx = null;
+
+function dragQuestaoStart(e) {
+  dragQuestaoIdx = parseInt(e.currentTarget.dataset.idx);
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function dragQuestaoOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+async function dragQuestaoDrop(e) {
+  e.preventDefault();
+  const targetIdx = parseInt(e.currentTarget.dataset.idx);
+  if (dragQuestaoIdx === null || dragQuestaoIdx === targetIdx) {
+    dragQuestaoIdx = null;
+    return;
+  }
+
+  const movedQuestao = prova.questoes.splice(dragQuestaoIdx, 1)[0];
+  prova.questoes.splice(targetIdx, 0, movedQuestao);
+
+  prova.questoes.forEach((q, i) => {
+    q.numero = i + 1;
+  });
+
+  dragQuestaoIdx = null;
+
+  renderQuestoes();
+
+  try {
+    const r = await fetch(`/admin/questao/${movedQuestao.id}/ordenar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ numero: targetIdx + 1 })
+    });
+    if (!r.ok) {
+      console.error('Erro ao salvar ordem das questões');
+    }
+  } catch (err) {
+    console.error('Erro ao salvar ordem:', err);
+  }
 }
 
 // ── Modal Prova ──────────────────────────────────────────────────────────────
 function abrirModalProva() {
   criandoNovaProva = true;
-  document.getElementById('p-titulo').value='';
-  document.getElementById('p-disciplina').value='';
-  document.getElementById('p-sheet').value='';
+  const tituloEl = document.getElementById('p-titulo');
+  const disciplinaEl = document.getElementById('p-disciplina');
+  if (tituloEl) tituloEl.value = '';
+  if (disciplinaEl) disciplinaEl.value = '';
+  // p-sheet foi removido - não existe mais
   abrirModal('m-prova');
 }
 
 async function salvarProva() {
   const titulo=document.getElementById('p-titulo').value.trim();
   const disciplina=document.getElementById('p-disciplina').value.trim();
-  const googleSheetId=document.getElementById('p-sheet').value.trim();
-  if (!titulo||!disciplina||!googleSheetId){toast('Preencha todos os campos','err');return;}
+  if (!titulo||!disciplina){toast('Preencha todos os campos','err');return;}
   const method=criandoNovaProva?'POST':'PUT';
-  const r=await fetch('/admin/prova',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({titulo,disciplina,googleSheetId})});
-  prova=await r.json();
-  criandoNovaProva=false;
-  fecharModal('m-prova');
-  renderSidebar();renderQuestoes();
-  toast('Prova salva!','ok');
+  const btn = document.querySelector('#m-prova .btn-p');
+  setLoading(btn, true);
+  showGlobalLoading('Salvando prova...');
+  try {
+    const r=await fetch('/admin/prova',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({titulo,disciplina})});
+    if (!r.ok) throw new Error('Erro ao salvar prova');
+    prova=await r.json();
+    console.log('salvarProva: prova atualizada', prova);
+    criandoNovaProva=false;
+    fecharModal('m-prova');
+    renderSidebar();renderQuestoes();
+    toast('Prova salva!','ok');
+  } catch (e) {
+    console.error('Erro ao salvar prova:', e);
+    toast('Erro ao salvar prova','err');
+  } finally {
+    setLoading(btn, false);
+    hideGlobalLoading();
+  }
 }
 
 // ── Selecionar Prova ─────────────────────────────────────────────────────────
 async function abrirModalSelecionar() {
   criandoNovaProva=false;
-  const r=await fetch('/admin/provas');
-  const lista=await r.json();
-  const el=document.getElementById('lista-provas-modal');
-  if (!lista.length){el.innerHTML='<div class="empty"><div class="ic">📂</div><p>Nenhuma prova salva</p></div>';abrirModal('m-sel');return;}
-  el.innerHTML=lista.map(p=>`
+  showGlobalLoading('Carregando provas...');
+  try {
+    const r=await fetch('/admin/provas');
+    const lista=await r.json();
+    const el=document.getElementById('lista-provas-modal');
+    if (!lista.length){
+      el.innerHTML='<div class="empty"><div class="ic">📂</div><p>Nenhuma prova salva</p></div>';
+      abrirModal('m-sel');
+      return;
+    }
+    el.innerHTML=lista.map(p=>`
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;display:flex;align-items:center;gap:12px">
       <div style="flex:1">
         <div style="font-weight:700;font-size:.88rem;margin-bottom:3px">${p.titulo}</div>
         <div style="font-size:.75rem;color:var(--muted)">${p.disciplina} · ${p.questoes.length} questões · ${p.ativa?'<span style="color:var(--success)">ATIVA</span>':'Inativa'}</div>
       </div>
-      <div style="display:flex;gap:6px">
-        <button class="btn-ic" onclick="selecionarProva('${p.id}')" title="Selecionar"><i class="bi bi-check-lg"></i></button>
-        <button class="btn-ic del" onclick="apagarProvaDaLista('${p.id}')" title="Apagar"><i class="bi bi-trash"></i></button>
-      </div>
+       <div style="display:flex;gap:6px">
+          <button class="btn-ic" onclick="selecionarProva('${p.id}', this)" title="Selecionar"><i class="bi bi-check-lg"></i></button>
+          <button class="btn-ic del" onclick="apagarProvaDaLista('${p.id}', this)" title="Apagar"><i class="bi bi-trash"></i></button>
+        </div>
     </div>`).join('');
-  abrirModal('m-sel');
+    abrirModal('m-sel');
+  } catch(e) {
+    toast('Erro ao carregar provas','err');
+  } finally {
+    hideGlobalLoading();
+  }
 }
 
-async function selecionarProva(id) {
-  await fetch(`/admin/prova/${id}/selecionar`,{method:'POST'});
-  const r=await fetch(`/admin/prova/${id}`);
-  prova=await r.json();
-  criandoNovaProva=false;
-  fecharModal('m-sel');
-  renderSidebar();renderQuestoes();
-  toast('Prova carregada!','ok');
+async function selecionarProva(id, btn) {
+  setLoading(btn, true);
+  showGlobalLoading('Carregando prova...');
+  try {
+    await fetch(`/admin/prova/${id}/selecionar`,{method:'POST'});
+    const r = await fetch(`/admin/prova/${id}`);
+    prova = await r.json();
+    console.log('selecionarProva: prova carregada', prova);
+    criandoNovaProva = false;
+    fecharModal('m-sel');
+    renderSidebar(); renderQuestoes();
+    toast('Prova carregada!','ok');
+  } catch (e) {
+    console.error('Erro ao carregar prova:', e);
+    toast('Erro ao carregar prova','err');
+  } finally {
+    setLoading(btn, false);
+    hideGlobalLoading();
+  }
 }
 
-async function apagarProvaDaLista(id) {
+async function apagarProvaDaLista(id, btn) {
   if (!confirm('Apagar esta prova permanentemente?')) return;
-  await fetch(`/admin/prova/${id}`,{method:'DELETE'});
-  if (prova?.id===id) prova=null;
-  renderSidebar();renderQuestoes();
-  toast('Prova apagada','ok');
-  abrirModalSelecionar();
+  if (btn) setLoading(btn, true);
+  showGlobalLoading('Apagando prova...');
+  try {
+    const r = await fetch(`/admin/prova/${id}`,{method:'DELETE'});
+    if (!r.ok) throw new Error('Erro ao apagar');
+    if (prova?.id===id) prova=null;
+    renderSidebar();renderQuestoes();
+    toast('Prova apagada','ok');
+    abrirModalSelecionar();
+  } catch(e) {
+    toast('Erro ao apagar','err');
+  } finally {
+    if (btn) setLoading(btn, false);
+    hideGlobalLoading();
+  }
 }
 
 async function confirmarApagarProva() {
   if (!prova) return;
   if (!confirm(`Apagar a prova "${prova.titulo}" permanentemente? Esta ação não pode ser desfeita.`)) return;
-  await fetch(`/admin/prova/${prova.id}`,{method:'DELETE'});
-  prova=null;
-  renderSidebar();renderQuestoes();
-  toast('Prova apagada','ok');
+  const btn = document.getElementById('btn-del-prova');
+  setLoading(btn, true);
+  showGlobalLoading('Apagando prova...');
+  try {
+    const r = await fetch(`/admin/prova/${prova.id}`,{method:'DELETE'});
+    if (!r.ok) throw new Error('Erro ao apagar');
+    prova=null;
+    renderSidebar();renderQuestoes();
+    toast('Prova apagada','ok');
+  } catch(e) {
+    toast('Erro ao apagar','err');
+  } finally {
+    setLoading(btn, false);
+    hideGlobalLoading();
+  }
 }
 
 async function toggleAtiva() {
-  const ep=prova.ativa?'/admin/desativar':'/admin/ativar';
-  const r=await fetch(ep,{method:'POST'});
-  if (r.ok){
-    prova.ativa=!prova.ativa;
-    renderSidebar();
-    toast(prova.ativa?'Prova ativada!':'Prova desativada','ok');
-  } else {
-    const d=await r.json(); toast(d.erro,'err');
+  const btn = document.getElementById('btn-ativar');
+  setLoading(btn, true);
+  showGlobalLoading(prova.ativa ? 'Desativando prova...' : 'Ativando prova...');
+  try {
+    const ep=prova.ativa?'/admin/desativar':'/admin/ativar';
+    const r=await fetch(ep,{method:'POST'});
+    if (r.ok){
+      prova.ativa=!prova.ativa;
+      renderSidebar();
+      toast(prova.ativa?'Prova ativada!':'Prova desativada','ok');
+    } else {
+      const d=await r.json(); toast(d.erro,'err');
+    }
+  } catch(e) {
+    toast('Erro na operação','err');
+  } finally {
+    setLoading(btn, false);
+    hideGlobalLoading();
   }
 }
 
@@ -449,7 +641,7 @@ function renderCampoEditor(campo, i) {
 }
 
 function adicionarCampoUI() {
-  const novo = {id:`campo-${Date.now()}`,tipo:'text',label:'Novo Campo',obrigatorio:false,opcoes:[],ordem:camposEditando.length};
+  const novo = {id:crypto.randomUUID(),tipo:'text',label:'Novo Campo',obrigatorio:false,opcoes:[],ordem:camposEditando.length};
   camposEditando.push(novo);
   renderCamposLista();
   editarCampoUI(camposEditando.length-1);
@@ -498,12 +690,21 @@ function dragDrop(e){
 }
 
 async function salvarCampos() {
-  const r=await fetch('/admin/campos-aluno',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({campos:camposEditando})});
-  if (r.ok){
+  const btn = document.querySelector('#m-campos .btn-p');
+  setLoading(btn, true);
+  showGlobalLoading('Salvando campos...');
+  try {
+    const r=await fetch('/admin/campos-aluno',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({campos:camposEditando})});
+    if (!r.ok) throw new Error('Erro ao salvar campos');
     prova.camposAluno=camposEditando;
     fecharModal('m-campos');
     renderSidebar();
     toast('Campos salvos!','ok');
+  } catch(e) {
+    toast('Erro ao salvar campos','err');
+  } finally {
+    setLoading(btn, false);
+    hideGlobalLoading();
   }
 }
 
@@ -712,89 +913,111 @@ function detectarBlocoLacunas(){
 }
 
 // ── Salvar Questão ───────────────────────────────────────────────────────────
-async function salvarQuestao(){
-  const tipo=document.getElementById('q-tipo').value;
-  const valor=parseFloat(document.getElementById('q-valor').value);
-  const enunciado=document.getElementById('q-enunciado').value.trim();
-  if (!enunciado||isNaN(valor)){toast('Preencha enunciado e valor','err');return;}
-  let payload={tipo,valor,enunciado};
+ async function salvarQuestao(){
+   const tipo=document.getElementById('q-tipo').value;
+   const valor=parseFloat(document.getElementById('q-valor').value);
+   const enunciado=document.getElementById('q-enunciado').value.trim();
+   if (!enunciado||isNaN(valor)){toast('Preencha enunciado e valor','err');return;}
+   let payload={tipo,valor,enunciado};
 
-  if (tipo==='multipla'){
-    const rows=document.getElementById('opcoes-lista').children;
-    const opcoes=[...rows].map((row,i)=>({
-      id:`op-${i}`,
-      texto:row.querySelector('input[type=text]').value.trim(),
-      correta:row.querySelector('input[type=checkbox]').checked
-    })).filter(o=>o.texto);
-    if (opcoes.length<2){toast('Adicione ao menos 2 opções','err');return;}
-    if (!opcoes.some(o=>o.correta)){toast('Marque ao menos uma opção correta','err');return;}
-    payload.opcoes=opcoes;
-  }
+   if (tipo==='multipla' || tipo==='multipla-simples'){
+     const rows=document.getElementById('opcoes-lista').children;
+     const opcoes=[...rows].map((row,i)=>({
+       id:`op-${i}`,
+       texto:row.querySelector('input[type=text]').value.trim(),
+       correta:row.querySelector('input[type=checkbox]').checked
+     })).filter(o=>o.texto);
+     if (opcoes.length<2){toast('Adicione ao menos 2 opções','err');return;}
+     if (!opcoes.some(o=>o.correta)){toast('Marque ao menos uma opção correta','err');return;}
+     payload.opcoes=opcoes;
+   }
 
-  if (tipo==='vf'){
-    const rows=document.getElementById('afirmativas-lista').children;
-    const afirmativas=[...rows].map((row,i)=>({
-      id:`af-${i}`,
-      texto:row.querySelector('input[type=text]').value.trim(),
-      correta:(row.querySelector('.vf-tgl')?.dataset.selected||'v')==='v'
-    })).filter(a=>a.texto);
-    if (!afirmativas.length){toast('Adicione ao menos 1 afirmativa','err');return;}
-    payload.afirmativas=afirmativas;
-  }
+   if (tipo==='vf'){
+     const rows=document.getElementById('afirmativas-lista').children;
+     const afirmativas=[...rows].map((row,i)=>({
+       id:`af-${i}`,
+       texto:row.querySelector('input[type=text]').value.trim(),
+       correta:(row.querySelector('.vf-tgl')?.dataset.selected||'v')==='v'
+     })).filter(a=>a.texto);
+     if (!afirmativas.length){toast('Adicione ao menos 1 afirmativa','err');return;}
+     payload.afirmativas=afirmativas;
+   }
 
-  if (tipo==='lacuna'){
-    const texto=document.getElementById('lacuna-texto')?.value.trim();
-    if (!texto){toast('Digite o texto com lacunas','err');return;}
-    const subtipo=document.getElementById('lacuna-subtipo').value;
-    const matches=[...texto.matchAll(/\{\{(\d+)\}\}/g)];
-    const idxs=[...new Set(matches.map(m=>parseInt(m[1])))].sort((a,b)=>a-b);
-    let lacunas=[];
-    if (subtipo==='opcoes'){
-      lacunas=idxs.map(i=>{
-        const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
-        const opEls=document.getElementById(`lo-${i}`)?.children||[];
-        const opcoes=[...opEls].map(row=>row.querySelector('input[type=text]').value.trim()).filter(Boolean);
-        return {id:`lac-${i}`,posicao:i,opcoes,correta};
-      });
-      if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
-    }else{
-      lacunas=idxs.map(i=>{
-        const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
-        return {id:`lac-${i}`,posicao:i,opcoes:[],correta};
-      });
-      if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
-      const blocoTexto=document.getElementById('lacuna-bloco-texto')?.value.trim();
-      const blocoPalavras=blocoTexto?[...new Set(blocoTexto.split(/[\n,]+/).map(p=>p.trim()).filter(Boolean))]:[];
-      if (blocoPalavras.length<lacunas.length+2){toast('Adicione ao menos '+(lacunas.length+2)+' palavras','err');return;}
-      payload.blocoPalavras=blocoPalavras;
+   if (tipo==='lacuna'){
+     const texto=document.getElementById('lacuna-texto')?.value.trim();
+     if (!texto){toast('Digite o texto com lacunas','err');return;}
+     const subtipo=document.getElementById('lacuna-subtipo').value;
+     const matches=[...texto.matchAll(/\{\{(\d+)\}\}/g)];
+     const idxs=[...new Set(matches.map(m=>parseInt(m[1])))].sort((a,b)=>a-b);
+     let lacunas=[];
+     if (subtipo==='opcoes'){
+       lacunas=idxs.map(i=>{
+         const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
+         const opEls=document.getElementById(`lo-${i}`)?.children||[];
+         const opcoes=[...opEls].map(row=>row.querySelector('input[type=text]').value.trim()).filter(Boolean);
+         return {id:`lac-${i}`,posicao:i,opcoes,correta};
+       });
+       if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
+     }else{
+       lacunas=idxs.map(i=>{
+         const correta=document.getElementById(`lc-${i}`)?.value.trim()||'';
+         return {id:`lac-${i}`,posicao:i,opcoes:[],correta};
+       });
+       if (lacunas.some(l=>!l.correta)){toast('Defina a resposta de cada lacuna','err');return;}
+       const blocoTexto=document.getElementById('lacuna-bloco-texto')?.value.trim();
+       const blocoPalavras=blocoTexto?[...new Set(blocoTexto.split(/[\n,]+/).map(p=>p.trim()).filter(Boolean))]:[];
+       if (blocoPalavras.length<lacunas.length+2){toast('Adicione ao menos '+(lacunas.length+2)+' palavras','err');return;}
+       payload.blocoPalavras=blocoPalavras;
+     }
+     payload.subtipo=subtipo;
+     payload.textoComLacunas=texto;
+     payload.lacunas=lacunas;
+   }
+
+    let r;
+    const btn = document.querySelector('#m-questao .btn-p');
+    setLoading(btn, true);
+    showGlobalLoading('Salvando questão...');
+    try {
+      if (editandoQuestaoId){
+        r=await fetch(`/admin/questao/${editandoQuestaoId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if (!r.ok) throw new Error('Erro ao atualizar questão');
+        const updated=await r.json();
+        const idx=prova.questoes.findIndex(q=>q.id===editandoQuestaoId);
+        if (idx>=0) prova.questoes[idx]=updated;
+      } else {
+        r=await fetch('/admin/questao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if (!r.ok) throw new Error('Erro ao adicionar questão');
+        const nova=await r.json();
+        prova.questoes.push(nova);
+      }
+      fecharModal('m-questao');
+      renderSidebar();renderQuestoes();
+      toast(editandoQuestaoId?'Questão atualizada!':'Questão adicionada!','ok');
+    } catch (e) {
+      toast('Erro na operação','err');
+    } finally {
+      setLoading(btn, false);
+      hideGlobalLoading();
     }
-    payload.subtipo=subtipo;
-    payload.textoComLacunas=texto;
-    payload.lacunas=lacunas;
   }
 
-  let r;
-  if (editandoQuestaoId){
-    r=await fetch(`/admin/questao/${editandoQuestaoId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const updated=await r.json();
-    const idx=prova.questoes.findIndex(q=>q.id===editandoQuestaoId);
-    if (idx>=0) prova.questoes[idx]=updated;
-  } else {
-    r=await fetch('/admin/questao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const nova=await r.json();
-    prova.questoes.push(nova);
-  }
-  fecharModal('m-questao');
-  renderSidebar();renderQuestoes();
-  toast(editandoQuestaoId?'Questão atualizada!':'Questão adicionada!','ok');
-}
-
-async function deletarQuestao(id){
+async function deletarQuestao(id, btn){
   if (!confirm('Remover esta questão?')) return;
-  await fetch(`/admin/questao/${id}`,{method:'DELETE'});
-  prova.questoes=prova.questoes.filter(q=>q.id!==id).map((q,i)=>({...q,numero:i+1}));
-  renderSidebar();renderQuestoes();
-  toast('Questão removida','ok');
+  if (btn) setLoading(btn, true);
+  showGlobalLoading('Removendo questão...');
+  try {
+    const r = await fetch(`/admin/questao/${id}`,{method:'DELETE'});
+    if (!r.ok) throw new Error('Erro ao remover');
+    prova.questoes=prova.questoes.filter(q=>q.id!==id).map((q,i)=>({...q,numero:i+1}));
+    renderSidebar();renderQuestoes();
+    toast('Questão removida','ok');
+  } catch(e) {
+    toast('Erro ao remover','err');
+  } finally {
+    if (btn) setLoading(btn, false);
+    hideGlobalLoading();
+  }
 }
 
 // ── Modais ───────────────────────────────────────────────────────────────────

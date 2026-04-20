@@ -3,18 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Resultado, Prova, Submissao, Questao, QuestaoLacuna, RespostaLacuna, RespostaLacunaBloco } from '../models/types';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const PROVA_ATIVA_PATH = path.join(DATA_DIR, 'prova_ativa.json');
-
+// TODO: Migrate to Supabase config table
 function getGoogleCredentials(): any {
-  try {
-    const data = JSON.parse(fs.readFileSync(PROVA_ATIVA_PATH, 'utf-8'));
-    if (data.googleCredentials) {
-      return JSON.parse(data.googleCredentials);
-    }
-  } catch {
-    // ignore
-  }
   const keyPath = path.join(process.cwd(), 'credentials', 'google-key.json');
   if (fs.existsSync(keyPath)) {
     return JSON.parse(fs.readFileSync(keyPath, 'utf-8'));
@@ -110,6 +100,12 @@ export async function salvarResultadoNaSheet(
   resultado: Resultado,
   submissao?: Submissao
 ): Promise<void> {
+  // Se não houver ID de planilha, pula o backup (opcional)
+  if (!sheetId) {
+    console.log('Google Sheets não configurado - backup pulado');
+    return;
+  }
+
   await garantirCabecalho(sheetId, prova);
 
   const auth = getAuth();

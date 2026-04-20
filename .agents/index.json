@@ -1,0 +1,194 @@
+{
+  "project": {
+    "name": "ProvaSystem",
+    "version": "1.0.0",
+    "description": "Sistema online de provas e avaliações com correção automática",
+    "stack": ["Node.js", "TypeScript", "Express", "Supabase", "Vanilla JS", "Bootstrap 5"]
+  },
+  "structure": {
+    "backend": {
+      "entry": "src/server.ts",
+      "config": "src/config/",
+      "database": "src/db/",
+      "models": "src/models/",
+      "routes": {
+        "admin": "src/admin/adminRoutes.ts",
+        "student": "src/student/studentRoutes.ts"
+      },
+      "utils": "src/utils/",
+      "sheets": "src/sheets/"
+    },
+    "frontend": {
+      "admin": "public/admin/",
+      "student": "public/student/"
+    }
+  },
+  "entities": {
+    "prova": {
+      "table": "provas",
+      "fields": ["id", "titulo", "descricao", "data_inicio", "data_fim", "status", "created_at"],
+      "status": ["draft", "active", "closed"],
+      "relations": ["questoes", "submissoes"]
+    },
+    "questao": {
+      "table": "questoes",
+      "fields": ["id", "prova_id", "tipo", "enunciado", "alternativas", "resposta_correta", "ordem", "peso"],
+      "types": ["multipla_escolha", "verdadeiro_falso", "dissertativa"]
+    },
+    "aluno": {
+      "table": "alunos",
+      "fields": ["id", "nome", "email", "identificacao", "created_at"]
+    },
+    "submissao": {
+      "table": "submissoes",
+      "fields": ["id", "prova_id", "aluno_id", "data_submissao", "status"]
+    },
+    "resposta": {
+      "table": "respostas",
+      "fields": ["id", "submissao_id", "questao_id", "resposta_aluno", "correcao_automatica", "nota", "feedback"]
+    }
+  },
+  "apis": {
+    "admin": {
+      "base": "/api/admin",
+      "endpoints": {
+        "provas": {
+          "POST": "/provas - Criar prova",
+          "GET": "/provas - Listar provas",
+          "PUT": "/provas/:id - Atualizar prova",
+          "DELETE": "/provas/:id - Excluir prova"
+        },
+        "questoes": {
+          "POST": "/questoes - Criar questão",
+          "GET": "/questoes - Listar questões",
+          "PUT": "/questoes/:id - Atualizar questão",
+          "DELETE": "/questoes/:id - Excluir questão"
+        },
+        "relatorios": {
+          "GET": "/relatorios - Relatórios e estatísticas"
+        },
+        "alunos": {
+          "GET": "/alunos - Gestão de alunos"
+        }
+      }
+    },
+    "student": {
+      "base": "/api/student",
+      "endpoints": {
+        "provas_disponiveis": {
+          "GET": "/provas/disponiveis - Listar provas ativas"
+        },
+        "submeter": {
+          "POST": "/provas/:id/submeter - Submeter respostas"
+        },
+        "resultados": {
+          "GET": "/resultados/:id - Ver resultado da prova"
+        },
+        "historico": {
+          "GET": "/historico - Histórico de provas"
+        }
+      }
+    }
+  },
+  "repositories": {
+    "provaRepository": {
+      "file": "src/db/provaRepository.ts",
+      "methods": ["create", "findById", "update", "delete", "listAtivas", "listByPeriodo"]
+    },
+    "respostaRepository": {
+      "file": "src/db/respostaRepository.ts",
+      "methods": ["createSubmissao", "createResposta", "corrigirAutomaticamente", "getResultadosPorProva"]
+    }
+  },
+  "agents": {
+    "architect": {
+      "description": "Agente arquiteto - responsible por estrutura, padrões, decisões técnicas",
+      "primary_files": ["src/server.ts", "src/config/", ".agents/ARCHITECTURE.md"]
+    },
+    "backend": {
+      "description": "Agente backend - implementa APIs, lógica de negócio, integrações",
+      "primary_files": ["src/admin/", "src/student/", "src/db/", "src/services/"]
+    },
+    "frontend": {
+      "description": "Agente frontend - interfaces administrativas e do aluno",
+      "primary_files": ["public/admin/", "public/student/"]
+    },
+    "test": {
+      "description": "Agente de testes - automatização, validação, cobertura",
+      "primary_files": ["tests/"]
+    },
+    "database": {
+      "description": "Agente de banco - migrations,种子数据, performance tuning",
+      "primary_files": ["supabase/migrations/", "src/models/"]
+    }
+  },
+  "skills": {
+    "read_file": "Ler conteúdo de arquivo",
+    "search_code": "Buscar padrão no código",
+    "apply_change": "Aplicar modificação em arquivo",
+    "run_tests": "Executar suite de testes",
+    "run_lint": "Executar linter (ESLint/TypeScript)",
+    "commit_changes": "Comitar mudanças no git",
+    "create_pr": "Criar Pull Request",
+    "search_web": "Buscar documentação/exemplos"
+  },
+  "conventions": {
+    "typescript_strict": true,
+    "indentation": "2 spaces",
+    "naming": {
+      "files": "camelCase com sufixo (Repository, Service, Routes)",
+      "variables": "camelCase",
+      "classes": "PascalCase",
+      "interfaces": "PascalCase"
+    },
+    "patterns": ["Repository", "Controller", "DTO"],
+    "error_handling": "try-catch + error middleware",
+    "logging": "winston estruturado"
+  },
+  "environment": {
+    "node_version": ">=18.0.0",
+    "env_vars": ["SUPABASE_URL", "SUPABASE_KEY", "PORT", "NODE_ENV", "CORS_ORIGIN"],
+    "scripts": {
+      "dev": "ts-node-dev src/server.ts",
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "lint": "eslint src/**/*.ts",
+      "test": "jest"
+    }
+  },
+  "status": {
+    "supabase_migration": "completed",
+    "typescript_setup": "completed",
+    "tests": "pending",
+    "frontend_framework": "vanilla_js_bootstrap"
+  },
+  "memory": {
+    "decisions_log": ".agents/memory/decisions_log.md",
+    "known_issues": ".agents/memory/known_issues.md",
+    "change_history": ".agents/memory/change_history.md"
+  },
+  "prompts": {
+    "architect": ".agents/prompts/architect.txt",
+    "backend": ".agents/prompts/backend.txt",
+    "frontend": ".agents/prompts/frontend.txt",
+    "test": ".agents/prompts/test.txt",
+    "database": ".agents/prompts/database.txt"
+  },
+  "constraints": {
+    "production_data": true,
+    "backward_compatibility": true,
+    "no_secrets_in_code": true,
+    "follow_conventions": true,
+    "verify_before_commit": true
+  },
+  "references": {
+    "main_guide": "GUIA_ESTRUTURA_AGENTES.md",
+    "project_context": ".agents/PROJECT_CONTEXT.md",
+    "architecture": ".agents/ARCHITECTURE.md",
+    "conventions": ".agents/CONVENTIONS.md",
+    "file_map": ".agents/file_map.md",
+    "agents_guide": ".agents/AGENTS.md",
+    "skills_guide": ".agents/SKILLS.md",
+    "orchestrator": ".agents/ORCHESTRATOR.md"
+  }
+}

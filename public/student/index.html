@@ -23,11 +23,16 @@
     .bullets{display:flex;gap:5px;flex-wrap:wrap;padding:0 22px 11px;background:var(--surface);border-bottom:1px solid var(--border)}
     .bullet{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:var(--mono)}
     .bullet.resp{background:var(--acl);border-color:var(--accent);color:var(--accent)}
+    .bullet.nao-resp{background:rgba(217,119,6,.15);border-color:var(--warning);color:var(--warning)}
     .bullet.curr{background:var(--accent);border-color:var(--accent);color:#fff}
     .wrap{max-width:700px;margin:0 auto;padding:28px 18px 100px}
     .card-q{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:0 2px 14px rgba(0,0,0,.07);margin-bottom:18px}
     .q-hd{display:flex;align-items:center;gap:11px;margin-bottom:20px}
     .q-num{background:var(--accent);color:#fff;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.88rem;font-family:var(--mono);flex-shrink:0}
+    .q-val{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+    .q-nao-respondida{margin-bottom:12px;padding:8px 12px;background:var(--warning);background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.3);border-radius:8px}
+    .q-nao-respondida label{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--warning);font-weight:600;cursor:pointer}
+    .q-nao-respondida input{width:16px;height:16px}
     .q-tipo{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px}
     .tm{background:var(--acl);color:var(--accent)}
     .tv{background:#fff8ec;color:var(--warning)}
@@ -257,7 +262,7 @@ function renderQuestao(){
   const p=S.prova;
   const q=p.questoes[S.qi];
   const total=p.questoes.length;
-  const resp=Object.keys(S.respostas).length;
+  const resp=Object.keys(S.respostas).filter(k=>S.respostas[k]!==undefined).length;
   const pct=Math.round((resp/total)*100);
   const tiposLbl={multipla:'Múltipla Escolha',vf:'Verdadeiro ou Falso',lacuna:'Preencher Lacunas','multipla-simples':'Múltipla Escolha'};
   const tiposCls={multipla:'tm',vf:'tv',lacuna:'tl','multipla-simples':'tm'};
@@ -265,7 +270,8 @@ function renderQuestao(){
   const bullets=p.questoes.map((_,i)=>{
     let cls='bullet';
     if(i===S.qi)cls+=' curr';
-    else if(S.respostas[p.questoes[i].id]!==undefined)cls+=' resp';
+    else if(S.respostas[p.questoes[i].id]!==undefined&&S.respostas[p.questoes[i].id]!==null)cls+=' resp';
+    else if(S.respostas[p.questoes[i].id]===null)cls+=' nao-resp';
     return `<div class="${cls}" onclick="irQ(${i})">${i+1}</div>`;
   }).join('');
   // Nome do aluno para header
@@ -286,6 +292,12 @@ function renderQuestao(){
           <div class="q-num">${q.numero}</div>
           <span class="q-tipo ${tiposCls[q.tipo]}">${tiposLbl[q.tipo]}</span>
           <span class="q-val">${q.valor} pt${q.valor!==1?'s':''}</span>
+        </div>
+        <div class="q-nao-respondida">
+          <label>
+            <input type="checkbox" id="chk-nao-respondida-${q.id}" ${S.respostas[q.id]===null?'checked':''} onchange="marcarNaoRespondida('${q.id}', this.checked)">
+            Não respondida
+          </label>
         </div>
         <div class="q-env">${q.enunciado}</div>
         <div id="resp-area">${renderRespArea(q)}</div>
@@ -339,6 +351,7 @@ function renderMultiplaSimples(q){
 }
 
 function selMultiplaSimples(qid,opid){
+  if(S.respostas[qid]===null)delete S.respostas[qid];
   S.respostas[qid]=opid;
   renderQuestao();
 }
@@ -374,10 +387,9 @@ function renderLacuna(q){
 function renderLacunaBloco(q){
   const resps=S.respostas[q.id]||{respostas:{},palavrasUsadas:[]};
   const respostas=resps.respostas||{};
-  const palavrasUsadas=resps.palavrasUsadas||[];
   const bloco=q.blocoPalavras||q.lacunas[0]?.opcoes||[];
-  const disponiveis=bloco.filter(p=>!palavrasUsadas.includes(p));
-  const palavraEls=disponiveis.map(p=>`
+  const blocoOrdenado=[...bloco].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const palavraEls=blocoOrdenado.map(p=>`
     <span class="bloco-palavra" draggable="true" ondragstart="dragPalavra(event,this)">${p}</span>
   `).join('');
   let txt=q.textoComLacunas;
@@ -389,7 +401,7 @@ function renderLacunaBloco(q){
       txt=txt.replace(`{{${lac.posicao}}}`,`<span class="lac-drop" data-qid="${q.id}" data-lacid="${lac.id}">Arraste aqui</span>`);
     }
   }
-  return `<div class="lac-bloco-wrap"><div class="bloco-palavras">${palavraEls||'<span style="color:var(--muted)">Todas as palavras foram usadas</span>'}</div><div class="lac-wrap">${txt}</div></div>`;
+  return `<div class="lac-bloco-wrap"><div class="bloco-palavras">${palavraEls}</div><div class="lac-wrap">${txt}</div></div>`;
 }
 
 function allowDrop(ev){ev.preventDefault();}
@@ -405,15 +417,8 @@ function dropPalavra(ev){
   selLacunaBloco(qid,lacid,palavra);
 }
 function selLacunaBloco(qid,lacid,palavra){
+  if(S.respostas[qid]===null)delete S.respostas[qid];
   if(!S.respostas[qid])S.respostas[qid]={tipo:'lacuna-bloco',respostas:{},palavrasUsadas:[]};
-  const alreadyUsed=Object.values(S.respostas[qid].respostas).some(p=>p===palavra);
-  if(alreadyUsed){
-    const anterior=Object.entries(S.respostas[qid].respostas).find(([l,p])=>p===palavra&&l!==lacid);
-    if(anterior){
-      const oldLacid=anterior[0];
-      delete S.respostas[oldLacid];
-    }
-  }
   S.respostas[qid].respostas[lacid]=palavra;
   if(!S.respostas[qid].palavrasUsadas.includes(palavra)){
     S.respostas[qid].palavrasUsadas.push(palavra);
@@ -421,6 +426,7 @@ function selLacunaBloco(qid,lacid,palavra){
   renderQuestao();
 }
 function removeLacunaBloco(qid,lacid){
+  if(S.respostas[qid]===null)delete S.respostas[qid];
   const palavra=S.respostas[qid]?.respostas?.[lacid];
   if(palavra){
     S.respostas[qid].palavrasUsadas=S.respostas[qid].palavrasUsadas.filter(p=>p!==palavra);
@@ -430,7 +436,17 @@ function removeLacunaBloco(qid,lacid){
 }
 
 // ── Ações de resposta ────────────────────────────────────────────────────────
+function marcarNaoRespondida(qid, marcada) {
+  if (marcada) {
+    S.respostas[qid] = null;
+  } else {
+    delete S.respostas[qid];
+  }
+  renderQuestao();
+}
+
 function toggleMultipla(qid,oid){
+  if(S.respostas[qid]===null)delete S.respostas[qid];
   let sel=S.respostas[qid]||[];
   if(sel.includes(oid)) sel=sel.filter(x=>x!==oid);
   else sel=[...sel,oid];
@@ -440,12 +456,14 @@ function toggleMultipla(qid,oid){
 }
 
 function selVF(qid,afid,val){
+  if(S.respostas[qid]===null)delete S.respostas[qid];
   if(!S.respostas[qid])S.respostas[qid]={};
   S.respostas[qid][afid]=val;
   renderQuestao();
 }
 
 function selLacuna(qid,lacid,val){
+  if(S.respostas[qid]===null)delete S.respostas[qid];
   const q=S.prova.questoes.find(x=>x.id===qid);
   const subtipo=q?.subtipo||'opcoes';
   if(subtipo==='bloco'){
@@ -538,6 +556,7 @@ async function enviarProva(){
   const p=S.prova;
   const respostasArr=p.questoes.map(q=>{
     const r=S.respostas[q.id];
+    if(r===null)return{tipo:'nao-respondida',questaoId:q.id};
     if(q.tipo==='multipla')return{tipo:'multipla',questaoId:q.id,opcoesSelecionadas:Array.isArray(r)?r:[]};
     if(q.tipo==='multipla-simples')return{tipo:'multipla-simples',questaoId:q.id,opcaoSelecionada:r||''};
     if(q.tipo==='vf')return{tipo:'vf',questaoId:q.id,respostas:r||{}};
